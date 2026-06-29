@@ -11,6 +11,13 @@
         <button class="btn-secondary" @click="exportExcel" :disabled="!products.length">
           <DownloadIcon class="w-4 h-4" /> Export
         </button>
+        <button class="btn-secondary" @click="downloadSample">
+          <FileDownIcon class="w-4 h-4" /> Sample File
+        </button>
+        <button class="btn-secondary" @click="triggerImport">
+          <UploadIcon class="w-4 h-4" /> Import
+        </button>
+        <input ref="importFileRef" type="file" accept=".xlsx,.xls,.csv" class="hidden" @change="handleImport" />
         <RouterLink to="/products/new" class="btn-primary">
           <PlusIcon class="w-4 h-4" /> New Product
         </RouterLink>
@@ -147,6 +154,54 @@
       </div>
     </div>
   </div>
+
+  <!-- Import Result Modal -->
+  <Teleport to="body">
+    <Transition name="modal">
+      <div v-if="importResult" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="importResult = null"></div>
+        <div class="relative card w-full max-w-md p-6 shadow-2xl">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Import Results</h3>
+          <div class="space-y-2 text-sm mb-4">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Total rows</span>
+              <span class="font-semibold">{{ importResult.total }}</span>
+            </div>
+            <div class="flex justify-between text-emerald-600">
+              <span>✅ Imported</span>
+              <span class="font-semibold">{{ importResult.success }}</span>
+            </div>
+            <div v-if="importResult.failed > 0" class="flex justify-between text-rose-600">
+              <span>❌ Failed</span>
+              <span class="font-semibold">{{ importResult.failed }}</span>
+            </div>
+          </div>
+          <div v-if="importResult.errors.length" class="mb-4 max-h-32 overflow-y-auto text-xs bg-rose-50 dark:bg-rose-900/20 rounded-lg p-3 space-y-1">
+            <p v-for="(e, i) in importResult.errors" :key="i" class="text-rose-600">{{ e }}</p>
+          </div>
+          <button class="btn-primary w-full justify-center" @click="importResult = null; fetchPage()">Done</button>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+
+  <!-- Import Progress -->
+  <Teleport to="body">
+    <Transition name="modal">
+      <div v-if="importing" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative card w-full max-w-xs p-6 shadow-2xl text-center">
+          <div class="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Importing products…</p>
+          <p class="text-xs text-gray-400 mt-1">{{ importProgress.done }} / {{ importProgress.total }}</p>
+          <div class="mt-3 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500 transition-all duration-300 rounded-full"
+                 :style="{ width: importProgress.total ? (importProgress.done / importProgress.total * 100) + '%' : '0%' }"></div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -154,7 +209,7 @@ import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 import api from '../api/client'
-import { PlusIcon, SearchIcon, EditIcon, PackageIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon } from 'lucide-vue-next'
+import { PlusIcon, SearchIcon, EditIcon, PackageIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, UploadIcon, FileDownIcon } from 'lucide-vue-next'
 import * as XLSX from 'xlsx'
 
 const products = ref<any[]>([])
@@ -162,6 +217,11 @@ const search = ref('')
 const filterStatus = ref('')
 const loading = ref(true)
 const meta = ref({ current_page: 1, last_page: 1, from: 1, to: 0, total: 0 })
+
+const importFileRef = ref<HTMLInputElement | null>(null)
+const importing = ref(false)
+const importProgress = ref({ done: 0, total: 0 })
+const importResult = ref<{ total: number; success: number; failed: number; errors: string[] } | null>(null)
 
 const colors = ['bg-blue-500','bg-emerald-500','bg-violet-500','bg-orange-500','bg-rose-500','bg-teal-500','bg-amber-500']
 const avatarColor = (i: number) => colors[i % colors.length]
@@ -198,5 +258,105 @@ function exportExcel() {
   XLSX.writeFile(wb, `products_${new Date().toISOString().slice(0,10)}.xlsx`)
 }
 
+function triggerImport() {
+  importFileRef.value?.click()
+}
+
+function downloadSample() {
+  const sample = [
+    {
+      'Name *': 'Sample Product',
+      'SKU': 'SKU001',
+      'Category': 'General',
+      'HSN Code': '9999',
+      'GST % (0/0.25/3/5/12/18/28)': 18,
+      'Purchase Price': 100,
+      'Selling Price *': 150,
+      'MRP': 175,
+      'Opening Stock': 50,
+      'Unit (pcs/kg/ltr/box)': 'pcs',
+    },
+    {
+      'Name *': 'Basmati Rice 5kg',
+      'SKU': 'RICE001',
+      'Category': 'Grocery',
+      'HSN Code': '1006',
+      'GST % (0/0.25/3/5/12/18/28)': 5,
+      'Purchase Price': 280,
+      'Selling Price *': 350,
+      'MRP': 400,
+      'Opening Stock': 100,
+      'Unit (pcs/kg/ltr/box)': 'kg',
+    },
+  ]
+  const ws = XLSX.utils.json_to_sheet(sample)
+  ws['!cols'] = Object.keys(sample[0]).map(() => ({ wch: 24 }))
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Products')
+  XLSX.writeFile(wb, 'OpenVyapar_Product_Import_Sample.xlsx')
+}
+
+async function handleImport(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  ;(event.target as HTMLInputElement).value = ''
+
+  const data = await file.arrayBuffer()
+  const wb = XLSX.read(data)
+  const ws = wb.Sheets[wb.SheetNames[0]]
+  const rows: any[] = XLSX.utils.sheet_to_json(ws)
+
+  if (!rows.length) return
+
+  importing.value = true
+  importProgress.value = { done: 0, total: rows.length }
+
+  const result = { total: rows.length, success: 0, failed: 0, errors: [] as string[] }
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i]
+    const name = row['Name *'] || row['Name'] || row['name'] || ''
+    const sellingPrice = row['Selling Price *'] || row['Selling Price'] || row['selling_price'] || 0
+
+    if (!name) {
+      result.failed++
+      result.errors.push(`Row ${i + 2}: Name is required`)
+      importProgress.value.done++
+      continue
+    }
+
+    try {
+      await api.post('/products', {
+        name: String(name).trim(),
+        sku: row['SKU'] || row['sku'] || null,
+        category_name: row['Category'] || row['category'] || null,
+        hsn_code: row['HSN Code'] || row['hsn_code'] || null,
+        gst_rate: Number(row['GST % (0/0.25/3/5/12/18/28)'] ?? row['GST%'] ?? row['gst_rate'] ?? 18),
+        purchase_price: Number(row['Purchase Price'] || row['purchase_price'] || 0),
+        selling_price: Number(sellingPrice),
+        mrp: row['MRP'] || row['mrp'] ? Number(row['MRP'] || row['mrp']) : null,
+        opening_stock: Number(row['Opening Stock'] || row['opening_stock'] || 0),
+        unit: row['Unit (pcs/kg/ltr/box)'] || row['Unit'] || row['unit'] || 'pcs',
+        is_active: true,
+      })
+      result.success++
+    } catch (e: any) {
+      result.failed++
+      const msg = e.response?.data?.message || Object.values(e.response?.data?.errors ?? {}).flat().join(', ') || 'Error'
+      result.errors.push(`Row ${i + 2} (${name}): ${msg}`)
+    }
+
+    importProgress.value.done++
+  }
+
+  importing.value = false
+  importResult.value = result
+}
+
 onMounted(() => fetchPage())
 </script>
+
+<style scoped>
+.modal-enter-active, .modal-leave-active { transition: all 0.2s ease; }
+.modal-enter-from, .modal-leave-to { opacity: 0; }
+</style>

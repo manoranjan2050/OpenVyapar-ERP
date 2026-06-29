@@ -136,9 +136,7 @@
       <div class="flex-1 overflow-y-auto">
         <div class="p-6 max-w-screen-2xl mx-auto">
           <RouterView v-slot="{ Component }">
-            <Transition name="page" mode="out-in">
-              <component :is="Component" />
-            </Transition>
+            <component :is="Component" :key="route.fullPath" />
           </RouterView>
         </div>
       </div>

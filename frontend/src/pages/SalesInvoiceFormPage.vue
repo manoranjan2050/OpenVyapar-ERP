@@ -6,10 +6,17 @@
       <div class="grid grid-cols-3 gap-4">
         <div>
           <label class="label">Customer *</label>
-          <select v-model="form.customer_id" class="input" required @change="onCustomerChange">
-            <option value="">Select Customer</option>
-            <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </select>
+          <SearchableSelect
+            v-model="form.customer_id"
+            :options="customerOptions"
+            placeholder="Search by name or mobile…"
+            @change="onCustomerChange"
+          >
+            <template #option="{ opt }">
+              <div class="font-medium text-gray-900 dark:text-white">{{ opt.label }}</div>
+              <div v-if="opt.sub" class="text-xs text-gray-400">📞 {{ opt.sub }}</div>
+            </template>
+          </SearchableSelect>
         </div>
         <div>
           <label class="label">Invoice Date *</label>
@@ -44,13 +51,19 @@
       <div>
         <div class="flex items-center justify-between mb-3">
           <h3 class="font-medium text-gray-700 dark:text-gray-300">Items</h3>
-          <button type="button" class="btn-secondary text-xs" @click="addItem">+ Add Item</button>
+          <div class="flex items-center gap-2">
+            <RouterLink to="/products/new" target="_blank"
+              class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+              <PlusCircleIcon class="w-3.5 h-3.5" /> New Product
+            </RouterLink>
+            <button type="button" class="btn-secondary text-xs" @click="addItem">+ Add Item</button>
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead class="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th class="px-3 py-2 text-left font-medium text-gray-500">Product</th>
+                <th class="px-3 py-2 text-left font-medium text-gray-500 w-52">Product</th>
                 <th class="px-3 py-2 text-right font-medium text-gray-500">Qty</th>
                 <th class="px-3 py-2 text-right font-medium text-gray-500">Rate ₹</th>
                 <th class="px-3 py-2 text-right font-medium text-gray-500">Disc%</th>
@@ -62,10 +75,12 @@
             <tbody>
               <tr v-for="(item, idx) in form.items" :key="idx" class="border-t border-gray-100 dark:border-gray-800">
                 <td class="px-3 py-2">
-                  <select v-model="item.product_id" class="input text-xs" @change="onProductSelect(idx)">
-                    <option value="">Select Product</option>
-                    <option v-for="p in products" :key="p.id" :value="p.id">{{ p.name }}</option>
-                  </select>
+                  <SearchableSelect
+                    v-model="item.product_id"
+                    :options="productOptions"
+                    placeholder="Search product…"
+                    @change="onProductSelect(idx)"
+                  />
                 </td>
                 <td class="px-3 py-2"><input v-model.number="item.quantity" type="number" step="0.001" min="0.001" class="input text-right w-20" @input="recalc" /></td>
                 <td class="px-3 py-2"><input v-model.number="item.rate" type="number" step="0.01" min="0" class="input text-right w-24" @input="recalc" /></td>
@@ -112,7 +127,9 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { PlusCircleIcon } from 'lucide-vue-next'
 import api from '../api/client'
+import SearchableSelect from '../components/SearchableSelect.vue'
 
 const router = useRouter()
 const customers = ref<any[]>([])
@@ -120,6 +137,14 @@ const products = ref<any[]>([])
 const saving = ref(false)
 const error = ref('')
 const gstRates = [0, 0.25, 3, 5, 12, 18, 28]
+
+const customerOptions = computed(() =>
+  customers.value.map(c => ({ value: c.id, label: c.name, sub: c.phone ?? '' }))
+)
+
+const productOptions = computed(() =>
+  products.value.map(p => ({ value: p.id, label: p.name, sub: p.sku ?? '' }))
+)
 
 const form = reactive({
   customer_id: '',
@@ -153,7 +178,7 @@ function itemTotal(item: any) {
   return taxable + taxable * item.gst_rate / 100
 }
 
-function recalc() {} // totals are computed
+function recalc() {}
 
 const totals = computed(() => {
   let subtotal = 0, discount = 0, taxable = 0, cgst = 0, sgst = 0, igst = 0
@@ -163,7 +188,6 @@ const totals = computed(() => {
     const tax = sub - disc
     const gstAmt = tax * item.gst_rate / 100
     subtotal += sub; discount += disc; taxable += tax
-    // simplified: all intra for preview
     cgst += gstAmt / 2; sgst += gstAmt / 2
   }
   return { subtotal, discount, taxable, cgst, sgst, igst, total: taxable + cgst + sgst + igst }
@@ -181,7 +205,10 @@ async function submit() {
 }
 
 onMounted(async () => {
-  const [c, p] = await Promise.all([api.get('/customers', { params: { active_only: 1, per_page: 500 } }), api.get('/products', { params: { active_only: 1, per_page: 500 } })])
+  const [c, p] = await Promise.all([
+    api.get('/customers', { params: { active_only: 1, per_page: 500 } }),
+    api.get('/products', { params: { active_only: 1, per_page: 500 } }),
+  ])
   customers.value = c.data.data
   products.value = p.data.data
 })

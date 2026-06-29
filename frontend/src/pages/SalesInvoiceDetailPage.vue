@@ -361,21 +361,28 @@ onMounted(() => loadInvoice())
 
 <style>
 @media print {
-  /* Hide everything except the invoice */
-  body > * { display: none !important; }
-  #app > * { display: none !important; }
-  aside, header, .btn-secondary, .btn-primary, .btn-danger, .btn-success, .btn-icon { display: none !important; }
+  /* Hide everything using visibility so the DOM tree stays intact */
+  body * { visibility: hidden !important; }
 
-  /* Show only the printable invoice */
+  /* Show only the invoice card and all its children */
+  #printable-invoice,
+  #printable-invoice * { visibility: visible !important; }
+
   #printable-invoice {
-    display: block !important;
     position: fixed !important;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0; left: 0;
+    width: 100%;
     background: white !important;
     color: black !important;
     font-size: 12px;
+    padding: 24px;
+    box-sizing: border-box;
   }
-  #printable-invoice * { color: black !important; background: transparent !important; border-color: #e5e7eb !important; }
+
+  #printable-invoice * { color: black !important; border-color: #e5e7eb !important; }
+  #printable-invoice .bg-gray-50,
+  #printable-invoice .bg-blue-50,
+  #printable-invoice [class*="dark:bg"] { background: #f9fafb !important; }
   #printable-invoice thead tr { background: #1e293b !important; }
   #printable-invoice thead th { color: white !important; }
 }
