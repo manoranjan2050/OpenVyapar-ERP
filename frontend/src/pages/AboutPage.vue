@@ -1,50 +1,112 @@
 <template>
   <div class="max-w-4xl space-y-8 animate-fade-up pb-12">
 
-    <!-- Developer Hero -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-8 text-white animate-fade-down">
+    <!-- Lead Developer Hero -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-8 text-white">
       <div class="absolute inset-0 opacity-10"
            style="background-image:radial-gradient(circle at 20% 50%,white 1px,transparent 1px);background-size:28px 28px"></div>
       <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-blue-500/10 blur-3xl"></div>
       <div class="absolute -left-8 -bottom-8 w-40 h-40 rounded-full bg-violet-500/10 blur-2xl"></div>
 
-      <div class="relative flex items-center gap-6">
-        <!-- Avatar -->
-        <div class="relative flex-shrink-0">
-          <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white text-3xl font-extrabold shadow-xl">
-            MR
+      <div class="relative">
+        <!-- Section label -->
+        <p class="text-[10px] font-bold text-blue-400/70 uppercase tracking-widest mb-4">Lead Developer & Creator</p>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+          <!-- GitHub Avatar -->
+          <div class="relative flex-shrink-0">
+            <img
+              src="https://github.com/manoranjan2050.png"
+              alt="MANORANJAN"
+              class="w-24 h-24 rounded-2xl object-cover shadow-xl ring-2 ring-blue-500/40"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+            />
+            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 items-center justify-center text-white text-3xl font-extrabold shadow-xl hidden">
+              MR
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-400 border-2 border-slate-900 flex items-center justify-center">
+              <div class="w-2 h-2 rounded-full bg-white"></div>
+            </div>
           </div>
-          <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-400 border-2 border-slate-900 flex items-center justify-center">
-            <div class="w-2 h-2 rounded-full bg-white"></div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">Lead Developer</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider">Creator</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">Open Source</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-white tracking-wide">MANORANJAN</h1>
+            <p class="text-blue-300 mt-0.5 text-sm">Full Stack Developer · IoT Engineer · Open Source Enthusiast</p>
+            <p class="text-slate-400 text-sm mt-1">📍 Odisha, India 🇮🇳</p>
+
+            <!-- Links -->
+            <div class="flex flex-wrap items-center gap-2 mt-4">
+              <a href="https://github.com/manoranjan2050" target="_blank" rel="noopener"
+                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all border border-white/10 hover:border-white/25">
+                <GithubIcon class="w-3.5 h-3.5" /> manoranjan2050
+              </a>
+              <a href="https://manoranjan.dev" target="_blank" rel="noopener"
+                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all border border-white/10 hover:border-white/25">
+                <GlobeIcon class="w-3.5 h-3.5" /> manoranjan.dev
+              </a>
+              <a href="mailto:manoranjan2050@live.com"
+                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all border border-white/10 hover:border-white/25">
+                <MailIcon class="w-3.5 h-3.5" /> manoranjan2050@live.com
+              </a>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-1">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">Developer</span>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">Open Source</span>
+    <!-- Co-Developer -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 p-6 text-white">
+      <div class="absolute inset-0 opacity-10"
+           style="background-image:radial-gradient(circle at 80% 50%,white 1px,transparent 1px);background-size:28px 28px"></div>
+      <div class="absolute -left-12 -top-12 w-48 h-48 rounded-full bg-violet-500/10 blur-3xl"></div>
+
+      <div class="relative">
+        <p class="text-[10px] font-bold text-violet-400/70 uppercase tracking-widest mb-4">Co-Developer & Contributor</p>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <div class="relative flex-shrink-0">
+            <img
+              src="https://github.com/ElectroIoT.png"
+              alt="ElectroIoT"
+              class="w-20 h-20 rounded-2xl object-cover shadow-xl ring-2 ring-violet-500/40"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+            />
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 items-center justify-center text-white text-2xl font-extrabold shadow-xl hidden">
+              EI
+            </div>
           </div>
-          <h1 class="text-2xl font-extrabold text-white">Manoranjan Kumar</h1>
-          <p class="text-blue-300 mt-0.5 text-sm">Full Stack Developer · IoT Engineer · Open Source Enthusiast</p>
-          <p class="text-slate-400 text-sm mt-1">Bhagalpur, Bihar, India 🇮🇳</p>
 
-          <!-- Links -->
-          <div class="flex flex-wrap items-center gap-3 mt-4">
-            <a href="https://github.com/manoranjan2050" target="_blank" rel="noopener"
-               class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all border border-white/10 hover:border-white/25">
-              <GithubIcon class="w-4 h-4" /> github.com/manoranjan2050
-            </a>
-            <a href="mailto:electroiot.in@gmail.com"
-               class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all border border-white/10 hover:border-white/25">
-              <MailIcon class="w-4 h-4" /> electroiot.in@gmail.com
-            </a>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30 uppercase tracking-wider">Co-Developer</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">Contributor</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white">ElectroIoT</h2>
+            <p class="text-violet-300 mt-0.5 text-sm">IoT Developer · Electronics Engineer · Open Source Contributor</p>
+            <p class="text-slate-400 text-sm mt-1">📍 Odisha, India 🇮🇳</p>
+
+            <div class="flex flex-wrap items-center gap-2 mt-3">
+              <a href="https://github.com/ElectroIoT" target="_blank" rel="noopener"
+                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all border border-white/10 hover:border-white/25">
+                <GithubIcon class="w-3.5 h-3.5" /> ElectroIoT
+              </a>
+              <a href="mailto:electroiot.in@gmail.com"
+                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all border border-white/10 hover:border-white/25">
+                <MailIcon class="w-3.5 h-3.5" /> electroiot.in@gmail.com
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Two column: App Info + Developer Bio -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-up delay-75">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
       <!-- App Info -->
       <div class="card p-6">
@@ -72,7 +134,7 @@
           </div>
           <div class="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800">
             <span class="text-gray-500">GST Compliance</span>
-            <span class="badge-green">India FY 2025-26</span>
+            <span class="font-semibold text-emerald-600 dark:text-emerald-400">India FY 2025-26</span>
           </div>
           <div class="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800">
             <span class="text-gray-500">Backend</span>
@@ -92,17 +154,13 @@
       <!-- Developer Bio -->
       <div class="card p-6">
         <h2 class="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <UserIcon class="w-4 h-4 text-blue-500" /> About the Developer
+          <UserIcon class="w-4 h-4 text-blue-500" /> About the Project
         </h2>
         <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-          Manoranjan Kumar is a passionate full-stack developer and IoT engineer from Bihar, India. He
-          builds open-source tools for Indian small businesses, especially those underserved by expensive
-          proprietary software.
+          <strong class="text-gray-800 dark:text-gray-200">MANORANJAN</strong> is a passionate full-stack developer and IoT engineer from Odisha, India. He builds open-source tools for Indian small businesses, especially those underserved by expensive proprietary software.
         </p>
         <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mt-3">
-          OpenVyapar ERP was created to give every Indian shopkeeper — from a kirana store to a wholesale
-          trader — a free, modern, GST-compliant billing system that works offline and doesn't require a
-          monthly subscription.
+          OpenVyapar ERP was created to give every Indian shopkeeper — from a kirana store to a wholesale trader — a free, modern, GST-compliant billing system that works offline and doesn't require a monthly subscription.
         </p>
         <div class="mt-5 grid grid-cols-2 gap-3">
           <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center">
@@ -117,8 +175,131 @@
       </div>
     </div>
 
+    <!-- Contact Us -->
+    <div class="card p-6">
+      <h2 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <MailIcon class="w-4 h-4 text-blue-500" /> Contact Us
+      </h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
+        Have a question, found a bug, or want to request a feature? Reach out — we respond to every message.
+        If you believe your open-source library or code was used in this project and you'd like credit added,
+        please email us and we'll add you to the credits list immediately.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Lead Dev Contact -->
+        <div class="flex items-start gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40">
+          <img src="https://github.com/manoranjan2050.png" alt="MANORANJAN"
+               class="w-10 h-10 rounded-xl object-cover flex-shrink-0"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'><rect width=\'40\' height=\'40\' rx=\'10\' fill=\'%232563eb\'/><text x=\'50%25\' y=\'65%25\' text-anchor=\'middle\' fill=\'white\' font-size=\'14\' font-weight=\'bold\'>MR</text></svg>'" />
+          <div>
+            <p class="font-bold text-gray-900 dark:text-white text-sm">MANORANJAN</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Lead Developer</p>
+            <a href="mailto:manoranjan2050@live.com"
+               class="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+              <MailIcon class="w-3.5 h-3.5" /> manoranjan2050@live.com
+            </a>
+          </div>
+        </div>
+        <!-- Co-Dev Contact -->
+        <div class="flex items-start gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40">
+          <img src="https://github.com/ElectroIoT.png" alt="ElectroIoT"
+               class="w-10 h-10 rounded-xl object-cover flex-shrink-0"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'><rect width=\'40\' height=\'40\' rx=\'10\' fill=\'%237c3aed\'/><text x=\'50%25\' y=\'65%25\' text-anchor=\'middle\' fill=\'white\' font-size=\'14\' font-weight=\'bold\'>EI</text></svg>'" />
+          <div>
+            <p class="font-bold text-gray-900 dark:text-white text-sm">ElectroIoT</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Co-Developer</p>
+            <a href="mailto:electroiot.in@gmail.com"
+               class="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:underline">
+              <MailIcon class="w-3.5 h-3.5" /> electroiot.in@gmail.com
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Website -->
+      <div class="mt-4 p-4 rounded-xl border border-blue-100 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/10 flex items-center gap-3">
+        <GlobeIcon class="w-5 h-5 text-blue-500 flex-shrink-0" />
+        <div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Official Website</p>
+          <a href="https://manoranjan.dev" target="_blank" rel="noopener"
+             class="font-semibold text-blue-600 dark:text-blue-400 hover:underline text-sm">https://manoranjan.dev</a>
+        </div>
+      </div>
+
+      <!-- Missing Credit Notice -->
+      <div class="mt-4 p-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+        <div class="flex items-start gap-2">
+          <AlertTriangleIcon class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+          <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+            <strong>Missing a credit?</strong> If you are a developer whose open-source library, code snippet, or contribution was used in this project
+            and you are not listed, please email <a href="mailto:manoranjan2050@live.com" class="underline font-semibold">manoranjan2050@live.com</a> and
+            we will add you to the credits list right away.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donate & Sponsor -->
+    <div class="card p-6">
+      <h2 class="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+        <HeartIcon class="w-4 h-4 text-rose-500" /> Support & Donations
+      </h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
+        OpenVyapar ERP is free and always will be. If it helped your business or you'd like to support continued development,
+        a donation or sponsorship is deeply appreciated. <strong class="text-gray-700 dark:text-gray-300">Please email before sending</strong>
+        so we can acknowledge your contribution properly.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- PayPal -->
+        <div class="p-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-900/10">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-[#003087] flex items-center justify-center flex-shrink-0">
+              <span class="text-white font-extrabold text-xs">PP</span>
+            </div>
+            <div>
+              <p class="font-bold text-gray-900 dark:text-white text-sm">PayPal</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Preferred donation method</p>
+            </div>
+          </div>
+          <p class="text-sm font-mono font-semibold text-blue-700 dark:text-blue-300 bg-white dark:bg-blue-900/30 rounded-lg px-3 py-2 border border-blue-200 dark:border-blue-700">
+            manoranjan2050@live.com
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-1">
+            <MailIcon class="w-3 h-3" /> Email before sending
+          </p>
+        </div>
+
+        <!-- Crypto -->
+        <div class="p-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/10">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
+              <span class="text-white font-extrabold text-xs">₿</span>
+            </div>
+            <div>
+              <p class="font-bold text-gray-900 dark:text-white text-sm">Cryptocurrency</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Crypto donations accepted</p>
+            </div>
+          </div>
+          <p class="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+            We accept crypto donations. Email us at
+            <a href="mailto:manoranjan2050@live.com" class="font-semibold underline">manoranjan2050@live.com</a>
+            to get the wallet address for your preferred coin (BTC, ETH, USDT, etc.).
+          </p>
+        </div>
+      </div>
+
+      <!-- Sponsor note -->
+      <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-rose-50 to-violet-50 dark:from-rose-900/20 dark:to-violet-900/20 border border-rose-200 dark:border-rose-800">
+        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          💼 <strong>Want to become a sponsor?</strong> Sponsors get their name/logo featured in the README, About page, and release notes.
+          Email <a href="mailto:manoranjan2050@live.com" class="font-semibold text-blue-600 dark:text-blue-400 hover:underline">manoranjan2050@live.com</a> to discuss sponsorship tiers.
+        </p>
+      </div>
+    </div>
+
     <!-- Tech Stack Credits -->
-    <div class="card p-6 animate-fade-up delay-100">
+    <div class="card p-6">
       <h2 class="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
         <CodeIcon class="w-4 h-4 text-violet-500" /> Technology Credits
       </h2>
@@ -142,13 +323,12 @@
     </div>
 
     <!-- EULA / License -->
-    <div class="card p-6 animate-fade-up delay-150">
+    <div class="card p-6">
       <h2 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <ScaleIcon class="w-4 h-4 text-orange-500" /> License & Terms of Use
       </h2>
 
       <div class="space-y-4 text-sm">
-        <!-- AGPL Banner -->
         <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
           <div class="flex items-start gap-3">
             <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
@@ -197,10 +377,9 @@
           </div>
         </div>
 
-        <!-- Full License Text Summary -->
         <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 font-mono text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
           <p class="font-bold text-gray-800 dark:text-gray-200 mb-2">COPYRIGHT NOTICE</p>
-          <p>Copyright (C) 2026 Manoranjan Kumar &lt;electroiot.in@gmail.com&gt;</p>
+          <p>Copyright (C) 2026 MANORANJAN &lt;manoranjan2050@live.com&gt;</p>
           <p class="mt-2">This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
           <p class="mt-2">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.</p>
           <p class="mt-2">You should have received a copy of the GNU Affero General Public License along with this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</p>
@@ -209,36 +388,21 @@
     </div>
 
     <!-- Disclaimer -->
-    <div class="card p-6 animate-fade-up delay-200">
+    <div class="card p-6">
       <h2 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <AlertTriangleIcon class="w-4 h-4 text-amber-500" /> Disclaimer & GST Declaration
       </h2>
       <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-        <p>
-          <strong class="text-gray-800 dark:text-gray-200">No Warranty:</strong>
-          OpenVyapar ERP is provided "as is" without any warranty of any kind, express or implied. The developer makes no representations about the suitability of this software for any particular purpose.
-        </p>
-        <p>
-          <strong class="text-gray-800 dark:text-gray-200">GST Compliance:</strong>
-          This software implements GST calculations as per the Indian GST Act 2017. However, it is the user's responsibility to verify all tax calculations with a qualified Chartered Accountant or GST practitioner before filing. The developer is not liable for any tax discrepancies, penalties, or losses arising from use of this software.
-        </p>
-        <p>
-          <strong class="text-gray-800 dark:text-gray-200">Data Privacy:</strong>
-          OpenVyapar ERP stores all data locally on your own server. No business data is transmitted to the developer or any third party. You are solely responsible for securing and backing up your data.
-        </p>
-        <p>
-          <strong class="text-gray-800 dark:text-gray-200">Not a CA Tool:</strong>
-          This software is a bookkeeping aid for small businesses. It does not constitute chartered accountancy, financial advisory, or legal advice. For statutory filings (GSTR-1, GSTR-3B, ITR), always work with a qualified professional.
-        </p>
-        <p>
-          <strong class="text-gray-800 dark:text-gray-200">Limitation of Liability:</strong>
-          In no event shall the developer be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including but not limited to loss of data, business interruption, or financial loss) arising from the use of this software, even if advised of the possibility of such damage.
-        </p>
+        <p><strong class="text-gray-800 dark:text-gray-200">No Warranty:</strong> OpenVyapar ERP is provided "as is" without any warranty of any kind, express or implied. The developer makes no representations about the suitability of this software for any particular purpose.</p>
+        <p><strong class="text-gray-800 dark:text-gray-200">GST Compliance:</strong> This software implements GST calculations as per the Indian GST Act 2017. However, it is the user's responsibility to verify all tax calculations with a qualified Chartered Accountant or GST practitioner before filing. The developer is not liable for any tax discrepancies, penalties, or losses arising from use of this software.</p>
+        <p><strong class="text-gray-800 dark:text-gray-200">Data Privacy:</strong> OpenVyapar ERP stores all data locally on your own server. No business data is transmitted to the developer or any third party. You are solely responsible for securing and backing up your data.</p>
+        <p><strong class="text-gray-800 dark:text-gray-200">Not a CA Tool:</strong> This software is a bookkeeping aid for small businesses. It does not constitute chartered accountancy, financial advisory, or legal advice. For statutory filings (GSTR-1, GSTR-3B, ITR), always work with a qualified professional.</p>
+        <p><strong class="text-gray-800 dark:text-gray-200">Limitation of Liability:</strong> In no event shall the developer be liable for any direct, indirect, incidental, special, exemplary, or consequential damages arising from the use of this software, even if advised of the possibility of such damage.</p>
       </div>
     </div>
 
     <!-- Open Source Declaration -->
-    <div class="card p-6 animate-fade-up delay-225">
+    <div class="card p-6">
       <h2 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <HeartIcon class="w-4 h-4 text-rose-500" /> Open Source Declaration
       </h2>
@@ -252,19 +416,19 @@
         <p>This project welcomes contributions from developers across India and the world. Whether you fix a bug, add a language translation, improve the UI, or write documentation — every contribution matters.</p>
         <p>If OpenVyapar ERP helped your business, consider:</p>
         <div class="flex flex-wrap gap-3 mt-3">
-          <a href="https://github.com/manoranjan2050/openvyapar-erp" target="_blank" rel="noopener"
+          <a href="https://github.com/manoranjan2050/OpenVyapar-ERP" target="_blank" rel="noopener"
              class="flex items-center gap-2 btn-secondary text-sm">
             <StarIcon class="w-4 h-4 text-amber-500" /> Star on GitHub
           </a>
-          <a href="https://github.com/manoranjan2050/openvyapar-erp/issues" target="_blank" rel="noopener"
+          <a href="https://github.com/manoranjan2050/OpenVyapar-ERP/issues" target="_blank" rel="noopener"
              class="flex items-center gap-2 btn-secondary text-sm">
             <BugIcon class="w-4 h-4 text-blue-500" /> Report a Bug
           </a>
-          <a href="https://github.com/manoranjan2050/openvyapar-erp/pulls" target="_blank" rel="noopener"
+          <a href="https://github.com/manoranjan2050/OpenVyapar-ERP/pulls" target="_blank" rel="noopener"
              class="flex items-center gap-2 btn-secondary text-sm">
             <GitPullRequestIcon class="w-4 h-4 text-violet-500" /> Submit a PR
           </a>
-          <a href="mailto:electroiot.in@gmail.com"
+          <a href="mailto:manoranjan2050@live.com"
              class="flex items-center gap-2 btn-secondary text-sm">
             <MailIcon class="w-4 h-4 text-emerald-500" /> Contact Developer
           </a>
@@ -273,9 +437,9 @@
     </div>
 
     <!-- Footer -->
-    <div class="text-center py-4 animate-fade-up delay-300">
+    <div class="text-center py-4">
       <p class="text-xs text-gray-400 dark:text-gray-600">
-        Made with ❤️ in India · OpenVyapar ERP v1.0.0 · AGPL v3 · Copyright © 2026 Manoranjan Kumar
+        Made with ❤️ in Odisha, India · OpenVyapar ERP v1.0.0 · AGPL v3 · Copyright © 2026 MANORANJAN
       </p>
       <p class="text-xs text-gray-300 dark:text-gray-700 mt-1">
         "Vyapar" (व्यापार) means "Business" in Hindi — OpenVyapar = Open Business
@@ -287,7 +451,7 @@
 
 <script setup lang="ts">
 import {
-  GithubIcon, MailIcon, UserIcon, CodeIcon, ScaleIcon,
+  GithubIcon, MailIcon, UserIcon, CodeIcon, ScaleIcon, GlobeIcon,
   AlertTriangleIcon, HeartIcon, StarIcon, BugIcon, GitPullRequestIcon,
 } from 'lucide-vue-next'
 
