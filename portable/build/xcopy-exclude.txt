@@ -1,10 +1,12 @@
 .env
-.git
-node_modules
-tests
-.phpunit.cache
+.git\
+node_modules\
+tests\
+.phpunit.cache\
 phpunit.xml
 .editorconfig
+.gitattributes
+.gitignore
 storage\logs\
 storage\framework\cache\
 storage\framework\sessions\
