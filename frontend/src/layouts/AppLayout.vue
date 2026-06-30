@@ -153,7 +153,7 @@ import {
   ReceiptIcon, ShoppingCartIcon, WarehouseIcon, SettingsIcon,
   LogOutIcon, SunIcon, MoonIcon, BellIcon, BuildingIcon, BarChart3Icon,
   BookOpenIcon, ArrowUpDownIcon, RotateCcwIcon, UserCogIcon, FileCodeIcon, InfoIcon,
-  BellRingIcon, ActivityIcon, Trash2Icon, DatabaseIcon,
+  BellRingIcon, ActivityIcon, Trash2Icon, DatabaseIcon, ClipboardListIcon,
 } from 'lucide-vue-next'
 import { useAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme'
@@ -169,6 +169,7 @@ const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { divider: 'Transactions', path: '', label: '', icon: null },
   { path: '/sales', label: 'Sales Invoices', icon: ReceiptIcon },
+  { path: '/challans', label: 'Delivery Challans', icon: ClipboardListIcon },
   { path: '/purchases', label: 'Purchases', icon: ShoppingCartIcon },
   { path: '/credit-notes', label: 'Credit Notes', icon: RotateCcwIcon },
   { divider: 'Masters', path: '', label: '', icon: null },
