@@ -142,6 +142,9 @@
       </div>
     </main>
   </div>
+
+  <!-- Force password change on first login -->
+  <ChangePasswordModal v-if="auth.mustChangePassword" @done="auth.clearMustChangePassword()" />
 </template>
 
 <script setup lang="ts">
@@ -153,10 +156,11 @@ import {
   ReceiptIcon, ShoppingCartIcon, WarehouseIcon, SettingsIcon,
   LogOutIcon, SunIcon, MoonIcon, BellIcon, BuildingIcon, BarChart3Icon,
   BookOpenIcon, ArrowUpDownIcon, RotateCcwIcon, UserCogIcon, FileCodeIcon, InfoIcon,
-  BellRingIcon, ActivityIcon, Trash2Icon, DatabaseIcon, ClipboardListIcon,
+  BellRingIcon, ActivityIcon, Trash2Icon, DatabaseIcon, ClipboardListIcon, CloudIcon,
 } from 'lucide-vue-next'
 import { useAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme'
+import ChangePasswordModal from '../components/ChangePasswordModal.vue'
 
 const auth = useAuthStore()
 const themeStore = useThemeStore()
@@ -191,6 +195,7 @@ const navItems = [
   { path: '/activity-log', label: 'Activity Log', icon: ActivityIcon },
   { path: '/trash', label: 'Recycle Bin', icon: Trash2Icon },
   { path: '/backup', label: 'Backup & Restore', icon: DatabaseIcon },
+  { path: '/backup-sync', label: 'Cloud Sync', icon: CloudIcon },
   { path: '/about', label: 'About', icon: InfoIcon },
 ].filter(i => i.icon || i.divider)
 

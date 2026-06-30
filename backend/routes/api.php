@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\TrashController;
 use App\Http\Controllers\Api\BackupController;
+use App\Http\Controllers\Api\BackupSyncController;
 use App\Http\Controllers\Api\ChallanController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,8 +30,9 @@ Route::get('/backups/download/{filename}', [BackupController::class, 'download']
 
 // Authenticated
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/logout',          [AuthController::class, 'logout']);
+    Route::get('/auth/me',               [AuthController::class, 'me']);
+    Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
@@ -120,6 +122,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/trash/restore-all', [TrashController::class, 'restoreAll']);
     Route::delete('/trash/item', [TrashController::class, 'forceDelete']);
     Route::delete('/trash/empty', [TrashController::class, 'empty']);
+
+    // Backup Sync Providers
+    Route::get('/backup-sync',                      [BackupSyncController::class, 'index']);
+    Route::post('/backup-sync/save',                [BackupSyncController::class, 'save']);
+    Route::post('/backup-sync/test',                [BackupSyncController::class, 'test']);
+    Route::post('/backup-sync/sync-now',            [BackupSyncController::class, 'syncNow']);
+    Route::get('/backup-sync/google/auth-url',      [BackupSyncController::class, 'googleAuthUrl']);
+    Route::get('/backup-sync/google/callback',      [BackupSyncController::class, 'googleCallback']);
 
     // Backup & Restore
     Route::get('/backups', [BackupController::class, 'index']);

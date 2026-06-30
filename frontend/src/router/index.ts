@@ -41,6 +41,7 @@ const router = createRouter({
         { path: 'activity-log', name: 'activity-log', component: () => import('../pages/ActivityLogPage.vue') },
         { path: 'trash', name: 'trash', component: () => import('../pages/TrashPage.vue') },
         { path: 'backup', name: 'backup', component: () => import('../pages/BackupPage.vue') },
+        { path: 'backup-sync', name: 'backup-sync', component: () => import('../pages/BackupSyncPage.vue') },
         { path: 'challans', name: 'challans', component: () => import('../pages/ChallanPage.vue') },
       ],
     },

@@ -63,14 +63,15 @@ class DatabaseSeeder extends Seeder
         // Warehouse
         Warehouse::create(['company_id' => $company->id, 'branch_id' => $branch->id, 'name' => 'Main Warehouse']);
 
-        // Admin user
+        // Admin user — must_change_password forces user to set their own password on first login
         $adminUser = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@openvyapar.in',
-            'password' => bcrypt('password'),
-            'company_id' => $company->id,
-            'branch_id' => $branch->id,
-            'phone' => '9876543210',
+            'name'                => 'Admin User',
+            'email'               => 'admin@openvyapar.in',
+            'password'            => bcrypt('password'),
+            'company_id'          => $company->id,
+            'branch_id'           => $branch->id,
+            'phone'               => '9876543210',
+            'must_change_password' => true,
         ]);
         $adminUser->assignRole($admin);
 

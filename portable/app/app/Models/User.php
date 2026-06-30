@@ -28,7 +28,8 @@ class User extends Authenticatable
     }
 
     protected $fillable = [
-        'uuid', 'name', 'email', 'password', 'company_id', 'branch_id', 'phone', 'is_active', 'role',
+        'uuid', 'name', 'email', 'password', 'company_id', 'branch_id', 'phone',
+        'is_active', 'role', 'must_change_password', 'password_changed_at',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -36,9 +37,11 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_active' => 'boolean',
+            'email_verified_at'   => 'datetime',
+            'password_changed_at' => 'datetime',
+            'password'            => 'hashed',
+            'is_active'           => 'boolean',
+            'must_change_password' => 'boolean',
         ];
     }
 
