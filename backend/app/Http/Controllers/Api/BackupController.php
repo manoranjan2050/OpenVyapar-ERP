@@ -128,9 +128,48 @@ class BackupController extends Controller
 
         if (empty($sqlContent)) return response()->json(['message' => 'No SQL found in the backup file.'], 422);
 
-        // Execute SQL — split on statement boundaries to handle both SQLite and MySQL dumps
+        $connection = config('database.default');
         $pdo = DB::getPdo();
-        $pdo->exec($sqlContent);
+
+        // Split into individual statements (semicolon at end of line)
+        $rawStatements = preg_split('/;\s*[\r\n]+/', $sqlContent);
+
+        // Filter statements based on the current DB driver
+        $statements = [];
+        foreach ($rawStatements as $stmt) {
+            $stmt = trim($stmt);
+            if ($stmt === '' || str_starts_with($stmt, '--')) continue;
+
+            if ($connection === 'sqlite') {
+                // Skip MySQL-only commands
+                if (preg_match('/^(SET\s|LOCK\s|UNLOCK\s)/i', $stmt)) continue;
+                // Skip duplicate transaction/pragma wrapping — we manage our own
+                if (preg_match('/^(BEGIN\s+TRANSACTION|COMMIT|PRAGMA\s+foreign_keys)/i', $stmt)) continue;
+            } else {
+                // Skip SQLite-only commands when on MySQL
+                if (preg_match('/^PRAGMA\s/i', $stmt)) continue;
+                if (preg_match('/^(BEGIN\s+TRANSACTION|COMMIT)/i', $stmt)) continue;
+            }
+
+            $statements[] = $stmt;
+        }
+
+        $pdo->beginTransaction();
+        try {
+            if ($connection === 'sqlite') {
+                $pdo->exec('PRAGMA foreign_keys=OFF');
+            }
+            foreach ($statements as $stmt) {
+                $pdo->exec($stmt);
+            }
+            if ($connection === 'sqlite') {
+                $pdo->exec('PRAGMA foreign_keys=ON');
+            }
+            $pdo->commit();
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            return response()->json(['message' => 'Restore failed: ' . $e->getMessage()], 500);
+        }
 
         return response()->json(['message' => 'Database restored successfully. Please refresh the app.']);
     }
