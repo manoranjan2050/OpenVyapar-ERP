@@ -25,8 +25,9 @@
       <div class="flex items-start justify-between mb-8">
         <div>
           <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-violet-800 flex items-center justify-center">
-              <span class="text-white font-extrabold text-sm">OV</span>
+            <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center bg-gradient-to-br from-violet-600 to-violet-800 flex-shrink-0">
+              <img v-if="companyLogoUrl" :src="companyLogoUrl" class="w-full h-full object-contain p-0.5" alt="Logo" />
+              <span v-else class="text-white font-extrabold text-sm">{{ (auth.user?.company?.name ?? 'OV').substring(0,2).toUpperCase() }}</span>
             </div>
             <div>
               <h2 class="text-lg font-extrabold text-gray-900 dark:text-white">{{ auth.user?.company?.name }}</h2>
@@ -202,7 +203,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import api from '../api/client'
 import { useAuthStore } from '../stores/auth'
@@ -210,7 +211,9 @@ import { ArrowLeftIcon, PrinterIcon, IndianRupeeIcon, XIcon } from 'lucide-vue-n
 
 const route   = useRoute()
 const auth    = useAuthStore()
-const invoice = ref<any>(null)
+const invoice  = ref<any>(null)
+const company  = ref<any>(null)
+const companyLogoUrl = computed(() => company.value?.logo_url ?? null)
 const showPayment = ref(false)
 const paying  = ref(false)
 const payError = ref('')
@@ -235,8 +238,12 @@ async function recordPayment() {
 }
 
 onMounted(async () => {
-  const { data } = await api.get(`/purchase-invoices/${route.params.id}`)
-  invoice.value = data
+  const [inv, co] = await Promise.all([
+    api.get(`/purchase-invoices/${route.params.id}`),
+    auth.user?.company_id ? api.get(`/companies/${auth.user.company_id}`) : null,
+  ])
+  invoice.value = inv.data
+  if (co) company.value = co.data
 })
 </script>
 

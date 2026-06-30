@@ -43,9 +43,20 @@
           <tr v-else v-for="u in users" :key="u.id" class="table-row group">
             <td class="table-cell">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold"
-                     :class="roleColor(u.role)">
-                  {{ u.name?.charAt(0)?.toUpperCase() }}
+                <!-- Avatar with click-to-upload -->
+                <div class="relative group/av cursor-pointer" @click="triggerAvatarUpload(u)">
+                  <img v-if="u.avatar_url"
+                       :src="u.avatar_url"
+                       :key="u.avatar_url"
+                       class="w-9 h-9 rounded-xl object-cover" />
+                  <div v-else
+                       class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold"
+                       :class="roleColor(u.role)">
+                    {{ u.name?.charAt(0)?.toUpperCase() }}
+                  </div>
+                  <div class="absolute inset-0 rounded-xl bg-black/50 opacity-0 group-hover/av:opacity-100 transition-opacity flex items-center justify-center">
+                    <CameraIcon class="w-3.5 h-3.5 text-white" />
+                  </div>
                 </div>
                 <p class="font-semibold text-gray-900 dark:text-white">{{ u.name }}</p>
               </div>
@@ -73,6 +84,9 @@
       </table>
     </div>
 
+    <!-- Hidden avatar file input -->
+    <input ref="avatarInput" type="file" accept="image/*" class="hidden" @change="onAvatarSelected" />
+
     <!-- Form Modal -->
     <Teleport to="body">
       <Transition name="modal">
@@ -85,21 +99,15 @@
             </div>
 
             <form @submit.prevent="save" class="space-y-4">
-
-              <!-- Name -->
               <div>
                 <label class="label">Full Name *</label>
                 <input v-model="form.name" class="input" required placeholder="Rajesh Kumar" />
               </div>
-
-              <!-- Email -->
               <div>
                 <label class="label">Email *</label>
                 <input v-model="form.email" type="email" class="input" required
                        placeholder="rajesh@myshop.in" :disabled="!!editUser" />
               </div>
-
-              <!-- Password -->
               <div>
                 <label class="label">{{ editUser ? 'New Password' : 'Password *' }}</label>
                 <div class="relative">
@@ -116,8 +124,6 @@
                   </button>
                 </div>
               </div>
-
-              <!-- Confirm Password (only when password is entered) -->
               <div v-if="form.password">
                 <label class="label">Confirm Password *</label>
                 <div class="relative">
@@ -133,14 +139,11 @@
                     <EyeIcon v-else class="w-4 h-4" />
                   </button>
                 </div>
-                <!-- Match indicator -->
                 <p v-if="form.confirmPassword" class="text-xs mt-1"
                    :class="passwordsMatch ? 'text-emerald-600' : 'text-rose-500'">
                   {{ passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match' }}
                 </p>
               </div>
-
-              <!-- Role -->
               <div>
                 <label class="label">Role *</label>
                 <select v-model="form.role" class="input" required>
@@ -150,18 +153,13 @@
                   <option value="viewer">Viewer — Read only</option>
                 </select>
               </div>
-
-              <!-- Active toggle (edit only) -->
               <div v-if="editUser" class="flex items-center gap-3">
                 <input v-model="form.is_active" type="checkbox" class="w-4 h-4 rounded" id="active" />
                 <label for="active" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">Account is active</label>
               </div>
-
-              <!-- Error -->
               <div v-if="error" class="flex items-center gap-2 text-rose-600 text-sm bg-rose-50 dark:bg-rose-900/20 px-3 py-2 rounded-xl">
                 <AlertCircleIcon class="w-4 h-4 flex-shrink-0" /> {{ error }}
               </div>
-
               <div class="flex gap-2 pt-1">
                 <button type="submit" class="btn-primary flex-1 justify-center"
                         :disabled="saving || (!!form.password && !passwordsMatch)">
@@ -188,7 +186,7 @@ import api from '../api/client'
 import { useAuthStore } from '../stores/auth'
 import {
   PlusIcon, XIcon, AlertCircleIcon, ShieldIcon,
-  CalculatorIcon, CreditCardIcon, EyeIcon, EyeOffIcon
+  CalculatorIcon, CreditCardIcon, EyeIcon, EyeOffIcon, CameraIcon,
 } from 'lucide-vue-next'
 
 const users    = ref<any[]>([])
@@ -199,8 +197,10 @@ const error    = ref('')
 const editUser = ref<any>(null)
 const auth     = useAuthStore()
 
-const showPassword = ref(false)
-const showConfirm  = ref(false)
+const showPassword   = ref(false)
+const showConfirm    = ref(false)
+const avatarInput    = ref<HTMLInputElement>()
+const uploadingUserId = ref<number | null>(null)
 
 const currentUserId = computed(() => auth.user?.id)
 
@@ -214,10 +214,10 @@ const passwordsMatch = computed(() =>
 )
 
 const roleDefs = [
-  { name: 'admin',      bg: 'bg-blue-100 dark:bg-blue-900/30',    color: 'text-blue-600 dark:text-blue-400',    icon: ShieldIcon,     desc: 'Full access to everything' },
-  { name: 'accountant', bg: 'bg-violet-100 dark:bg-violet-900/30',color: 'text-violet-600 dark:text-violet-400',icon: CalculatorIcon, desc: 'View reports, record payments' },
-  { name: 'cashier',    bg: 'bg-emerald-100 dark:bg-emerald-900/30',color:'text-emerald-600 dark:text-emerald-400',icon: CreditCardIcon, desc: 'Create invoices only' },
-  { name: 'viewer',     bg: 'bg-gray-100 dark:bg-gray-800',        color: 'text-gray-500 dark:text-gray-400',   icon: EyeIcon,        desc: 'Read-only access' },
+  { name: 'admin',      bg: 'bg-blue-100 dark:bg-blue-900/30',     color: 'text-blue-600 dark:text-blue-400',     icon: ShieldIcon,     desc: 'Full access to everything' },
+  { name: 'accountant', bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400', icon: CalculatorIcon, desc: 'View reports, record payments' },
+  { name: 'cashier',    bg: 'bg-emerald-100 dark:bg-emerald-900/30',color: 'text-emerald-600 dark:text-emerald-400',icon: CreditCardIcon, desc: 'Create invoices only' },
+  { name: 'viewer',     bg: 'bg-gray-100 dark:bg-gray-800',         color: 'text-gray-500 dark:text-gray-400',    icon: EyeIcon,        desc: 'Read-only access' },
 ]
 
 const roleColor = (r: string) => ({
@@ -231,6 +231,30 @@ const roleBadge = (r: string) => ({
   cashier:    'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
   viewer:     'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 }[r] ?? 'bg-gray-100 text-gray-600')
+
+function triggerAvatarUpload(u: any) {
+  uploadingUserId.value = u.id
+  avatarInput.value?.click()
+}
+
+async function onAvatarSelected(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file || !uploadingUserId.value) return
+  const fd = new FormData()
+  fd.append('avatar', file)
+  try {
+    const { data } = await api.post(`/users/${uploadingUserId.value}/avatar`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    const u = users.value.find(x => x.id === uploadingUserId.value)
+    if (u) u.avatar_url = data.avatar_url + '?t=' + Date.now()
+  } catch {
+    alert('Avatar upload failed.')
+  } finally {
+    if (avatarInput.value) avatarInput.value.value = ''
+    uploadingUserId.value = null
+  }
+}
 
 function openForm(u?: any) {
   editUser.value     = u ?? null
@@ -252,13 +276,10 @@ async function save() {
   error.value  = ''
   try {
     const payload: any = {
-      name: form.value.name,
-      email: form.value.email,
-      role: form.value.role,
-      is_active: form.value.is_active,
+      name: form.value.name, email: form.value.email,
+      role: form.value.role, is_active: form.value.is_active,
     }
     if (form.value.password) payload.password = form.value.password
-
     if (editUser.value) {
       await api.put(`/users/${editUser.value.id}`, payload)
     } else {

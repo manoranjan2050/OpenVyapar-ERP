@@ -35,8 +35,9 @@
       <div class="flex items-start justify-between mb-8">
         <div>
           <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center print:bg-blue-700">
-              <span class="text-white font-extrabold text-sm">OV</span>
+            <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 print:bg-blue-700 flex-shrink-0">
+              <img v-if="companyLogoUrl" :src="companyLogoUrl" class="w-full h-full object-contain p-0.5" alt="Logo" />
+              <span v-else class="text-white font-extrabold text-sm">{{ (invoice.company?.name ?? auth.user?.company?.name ?? 'OV').substring(0,2).toUpperCase() }}</span>
             </div>
             <div>
               <h2 class="text-lg font-extrabold text-gray-900 dark:text-white">{{ invoice.company?.name ?? auth.user?.company?.name }}</h2>
@@ -295,7 +296,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import api from '../api/client'
 import { useAuthStore } from '../stores/auth'
@@ -308,6 +309,8 @@ const route  = useRoute()
 const router = useRouter()
 const auth   = useAuthStore()
 const invoice = ref<any>(null)
+const company = ref<any>(null)
+const companyLogoUrl = computed(() => company.value?.logo_url ?? null)
 
 // Payment modal
 const showPayment = ref(false)
@@ -356,7 +359,13 @@ function whatsapp() {
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
 }
 
-onMounted(() => loadInvoice())
+onMounted(async () => {
+  loadInvoice()
+  if (auth.user?.company_id) {
+    const { data } = await api.get(`/companies/${auth.user.company_id}`)
+    company.value = data
+  }
+})
 </script>
 
 <style>

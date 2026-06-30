@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\TrashController;
 use App\Http\Controllers\Api\BackupController;
+use App\Http\Controllers\Api\ChallanController;
 use Illuminate\Support\Facades\Route;
 
 // Public
@@ -78,7 +79,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/credit-notes', [CreditNoteController::class, 'store']);
 
     // Users & Roles
+    Route::post('/users/{user}/avatar', [UserController::class, 'uploadAvatar']);
     Route::apiResource('users', UserController::class)->except(['show']);
+
+    // Company Logo
+    Route::post('/companies/{company}/logo', [CompanyController::class, 'uploadLogo']);
+
+    // Delivery Challans
+    Route::post('/challans/{challan}/dispatch', [ChallanController::class, 'dispatch']);
+    Route::post('/challans/{challan}/convert',  [ChallanController::class, 'convert']);
+    Route::post('/challans/{challan}/cancel',   [ChallanController::class, 'cancel']);
+    Route::get('/challans/{challan}',           [ChallanController::class, 'show']);
+    Route::apiResource('challans', ChallanController::class)->only(['index', 'store']);
 
     // Tally Export
     Route::get('/tally/export', [TallyController::class, 'export']);
