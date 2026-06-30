@@ -19,7 +19,7 @@ A complete, production-ready ERP system built specifically for Indian small busi
 
 </div>
 
-> **Default login** &nbsp;→&nbsp; Email: `admin@demo.com` &nbsp;·&nbsp; Password: `password`
+> **Default login** &nbsp;→&nbsp; Email: `admin@openvyapar.in` &nbsp;·&nbsp; Password: `password`
 > *(Change the password after first login — Settings → Users)*
 
 <div align="center">
@@ -214,7 +214,7 @@ No installation needed — extract and run.
 
 | Field | Value |
 |---|---|
-| Email | `admin@demo.com` |
+| Email | `admin@openvyapar.in` |
 | Password | `password` |
 
 > The portable edition uses **SQLite** (no MySQL needed). All data is stored in `app\database\database.sqlite` inside the extracted folder. Back up that file to keep your data safe.
@@ -279,7 +279,7 @@ http://localhost:5173
 
 | Field | Value |
 |---|---|
-| Email | `admin@demo.com` |
+| Email | `admin@openvyapar.in` |
 | Password | `password` |
 
 > **Change the password** immediately after first login via Settings → Users.
