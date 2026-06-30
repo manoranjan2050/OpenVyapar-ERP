@@ -20,6 +20,8 @@ set "FRONTEND=%REPO%frontend"
 set "PHP_DIR=%PORTABLE%php"
 set "APP_DIR=%PORTABLE%app"
 set "WWW_DIR=%PORTABLE%www"
+set "LAUNCHER_DIR=%PORTABLE%launcher-rs"
+set "LAUNCHER_EXE=%LAUNCHER_DIR%\target\release\OpenVyapar.exe"
 
 echo  Paths:
 echo    Portable root : %PORTABLE%
@@ -79,6 +81,21 @@ if not exist "%FRONTEND%\package.json" (
     set "MISSING_LIST=%MISSING_LIST% Frontend"
 ) else (
     echo    [OK] Frontend found
+)
+
+cargo --version >nul 2>&1
+if errorlevel 1 (
+    :: No Rust - check if pre-built exe exists
+    if exist "%LAUNCHER_EXE%" (
+        echo    [OK] Rust absent but pre-built OpenVyapar.exe found - skipping compile
+        set "SKIP_RUST=1"
+    ) else (
+        echo    [MISSING] Rust - install from https://rustup.rs  OR pre-build the launcher
+        set "MISSING_LIST=%MISSING_LIST% Rust"
+    )
+) else (
+    for /f "delims=" %%v in ('cargo --version 2^>nul') do echo    [OK] %%v
+    set "SKIP_RUST=0"
 )
 
 echo.
@@ -147,6 +164,27 @@ if exist "%WWW_DIR%" rmdir /s /q "%WWW_DIR%"
 mkdir "%WWW_DIR%"
 xcopy /s /e /q /y "%FRONTEND%\dist\*" "%WWW_DIR%\" >nul
 echo  Frontend OK.
+echo.
+
+:: ----------------------------------------------------------------
+:: STEP 3b - Build Rust launcher exe
+:: ----------------------------------------------------------------
+echo  [STEP 3b] Building launcher exe (OpenVyapar.exe)...
+echo.
+
+if "%SKIP_RUST%"=="1" (
+    echo  Using pre-built exe at: %LAUNCHER_EXE%
+) else (
+    cd /d "%LAUNCHER_DIR%"
+    echo  Running: cargo build --release
+    call cargo build --release
+    if errorlevel 1 (
+        echo  [ERROR] Rust build failed. Check cargo output above.
+        pause
+        exit /b 1
+    )
+    echo  Launcher built OK.
+)
 echo.
 
 :: ----------------------------------------------------------------
@@ -247,8 +285,14 @@ if not exist "%DIST%" mkdir "%DIST%"
 set "ZIP=%DIST%\OpenVyapar-ERP-Portable-v1.0.0-Windows.zip"
 if exist "%ZIP%" del /f "%ZIP%"
 
+:: Copy launcher exe to portable root so it sits next to start.bat
+if exist "%LAUNCHER_EXE%" (
+    copy /y "%LAUNCHER_EXE%" "%PORTABLE%OpenVyapar.exe" >nul
+    echo  Launcher exe copied to portable root.
+)
+
 echo  Compressing (this may take a minute)...
-powershell -Command "$ProgressPreference='SilentlyContinue'; $paths = @('%APP_DIR%','%WWW_DIR%','%PHP_DIR%','%PORTABLE%launcher','%PORTABLE%start.bat','%PORTABLE%stop.bat','%PORTABLE%README-PORTABLE.md'); $exist = $paths | Where-Object { Test-Path $_ }; Compress-Archive -Path $exist -DestinationPath '%ZIP%' -CompressionLevel Optimal"
+powershell -Command "$ProgressPreference='SilentlyContinue'; $paths = @('%APP_DIR%','%WWW_DIR%','%PHP_DIR%','%PORTABLE%OpenVyapar.exe','%PORTABLE%start.bat','%PORTABLE%stop.bat','%PORTABLE%README-PORTABLE.md'); $exist = $paths | Where-Object { Test-Path $_ }; Compress-Archive -Path $exist -DestinationPath '%ZIP%' -CompressionLevel Optimal"
 
 if errorlevel 1 (
     echo  [ERROR] ZIP creation failed.
@@ -266,7 +310,8 @@ echo.
 echo   ZIP  : %ZIP%
 echo   Size : ~%ZIP_MB% MB
 echo.
-echo   Extract and double-click start.bat  -- done!
+echo   Extract and double-click OpenVyapar.exe  (GUI launcher^)
+  Or run start.bat for console mode!
 echo  ===========================================================
 echo.
 pause
