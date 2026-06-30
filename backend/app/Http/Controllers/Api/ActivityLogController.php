@@ -55,13 +55,23 @@ class ActivityLogController extends Controller
 
         $base = Activity::whereHas('causer', fn($u) => $u->where('company_id', $cid));
 
+        // by_model: extract short class name in PHP to avoid DB-specific string functions
+        $byModel = (clone $base)->select('subject_type', \DB::raw('count(*) as cnt'))
+            ->whereNotNull('subject_type')
+            ->groupBy('subject_type')
+            ->get()
+            ->mapWithKeys(fn($row) => [
+                class_basename($row->subject_type) => $row->cnt
+            ])
+            ->sortDesc()
+            ->take(10);
+
         return response()->json([
-            'total'   => $base->count(),
-            'today'   => (clone $base)->whereDate('created_at', today())->count(),
-            'week'    => (clone $base)->whereBetween('created_at', [now()->startOfWeek(), now()])->count(),
-            'by_event'=> (clone $base)->selectRaw('event, count(*) as cnt')->groupBy('event')->pluck('cnt', 'event'),
-            'by_model'=> (clone $base)->selectRaw('SUBSTRING_INDEX(subject_type, chr(92), -1) as model, count(*) as cnt')
-                ->groupBy('model')->orderByDesc('cnt')->limit(10)->pluck('cnt', 'model'),
+            'total'    => $base->count(),
+            'today'    => (clone $base)->whereDate('created_at', today())->count(),
+            'week'     => (clone $base)->whereBetween('created_at', [now()->startOfWeek(), now()])->count(),
+            'by_event' => (clone $base)->selectRaw('event, count(*) as cnt')->groupBy('event')->pluck('cnt', 'event'),
+            'by_model' => $byModel,
         ]);
     }
 }

@@ -30,6 +30,12 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
+        activity('auth')
+            ->causedBy($user)
+            ->withProperties(['company_id' => $user->company_id, 'ip' => $request->ip()])
+            ->event('login')
+            ->log('User logged in');
+
         return response()->json([
             'token' => $token,
             'user' => $user->load('company', 'branch')->append([]),

@@ -6,10 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Payment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['payment_number', 'company_id', 'type', 'amount', 'mode', 'payment_date', 'party_type', 'party_id'])
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $event) => "Payment {$event}");
+    }
 
     protected $fillable = [
         'uuid', 'company_id', 'payment_number', 'type', 'party_type', 'party_id',
