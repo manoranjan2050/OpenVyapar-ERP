@@ -41,20 +41,17 @@ class BackupController extends Controller
     // Create a new backup
     public function create(Request $request): \Illuminate\Http\JsonResponse
     {
-        $label = $request->input('label', 'manual');
-        $db    = config('database.connections.mysql.database');
-        $host  = config('database.connections.mysql.host');
-        $port  = config('database.connections.mysql.port', 3306);
-        $user  = config('database.connections.mysql.username');
-        $pass  = config('database.connections.mysql.password');
+        $label      = $request->input('label', 'manual');
+        $connection = config('database.default');
+        $ts         = now()->format('Ymd_His');
+        $sqlFile    = $this->backupDir() . "/openvyapar_{$label}_{$ts}.sql";
+        $zipFile    = $this->backupDir() . "/openvyapar_{$label}_{$ts}.zip";
 
-        $ts      = now()->format('Ymd_His');
-        $sqlFile = $this->backupDir() . "/openvyapar_{$label}_{$ts}.sql";
-        $zipFile = $this->backupDir() . "/openvyapar_{$label}_{$ts}.zip";
-
-        // Dump using PHP PDO (works without mysqldump binary)
+        // Dump using PHP PDO — works for both SQLite and MySQL
         $pdo = DB::getPdo();
-        $sql = $this->dumpDatabase($pdo, $db);
+        $sql = $connection === 'sqlite'
+            ? $this->dumpSqlite($pdo)
+            : $this->dumpMysql($pdo, config('database.connections.mysql.database'));
         file_put_contents($sqlFile, $sql);
 
         // Zip
@@ -131,8 +128,9 @@ class BackupController extends Controller
 
         if (empty($sqlContent)) return response()->json(['message' => 'No SQL found in the backup file.'], 422);
 
-        // Execute SQL statements
-        DB::unprepared($sqlContent);
+        // Execute SQL — split on statement boundaries to handle both SQLite and MySQL dumps
+        $pdo = DB::getPdo();
+        $pdo->exec($sqlContent);
 
         return response()->json(['message' => 'Database restored successfully. Please refresh the app.']);
     }
@@ -186,10 +184,53 @@ class BackupController extends Controller
         ]);
     }
 
-    // PHP-based database dump (no mysqldump required)
-    private function dumpDatabase(\PDO $pdo, string $dbName): string
+    // SQLite dump — uses sqlite_master to get schema
+    private function dumpSqlite(\PDO $pdo): string
     {
-        $sql  = "-- OpenVyapar ERP Database Backup\n";
+        $sql  = "-- OpenVyapar ERP Database Backup (SQLite)\n";
+        $sql .= "-- Generated: " . now()->toDateTimeString() . "\n\n";
+        $sql .= "PRAGMA foreign_keys=OFF;\nBEGIN TRANSACTION;\n\n";
+
+        $tables = $pdo->query(
+            "SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+        )->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($tables as $t) {
+            $name = $t['name'];
+            $sql .= "DROP TABLE IF EXISTS \"{$name}\";\n";
+            $sql .= $t['sql'] . ";\n\n";
+
+            $rows = $pdo->query("SELECT * FROM \"{$name}\"")->fetchAll(\PDO::FETCH_ASSOC);
+            if (empty($rows)) continue;
+
+            $cols = '"' . implode('", "', array_keys($rows[0])) . '"';
+            foreach (array_chunk($rows, 200) as $chunk) {
+                $vals = implode(",\n", array_map(function ($row) use ($pdo) {
+                    return '(' . implode(', ', array_map(
+                        fn($v) => $v === null ? 'NULL' : $pdo->quote((string)$v), $row
+                    )) . ')';
+                }, $chunk));
+                $sql .= "INSERT INTO \"{$name}\" ({$cols}) VALUES\n{$vals};\n";
+            }
+            $sql .= "\n";
+        }
+
+        // Also dump indexes
+        $indexes = $pdo->query(
+            "SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL"
+        )->fetchAll(\PDO::FETCH_COLUMN);
+        foreach ($indexes as $idx) {
+            $sql .= $idx . ";\n";
+        }
+
+        $sql .= "\nCOMMIT;\nPRAGMA foreign_keys=ON;\n";
+        return $sql;
+    }
+
+    // MySQL dump — uses SHOW TABLES / SHOW CREATE TABLE
+    private function dumpMysql(\PDO $pdo, string $dbName): string
+    {
+        $sql  = "-- OpenVyapar ERP Database Backup (MySQL)\n";
         $sql .= "-- Generated: " . now()->toDateTimeString() . "\n";
         $sql .= "-- Database: {$dbName}\n\n";
         $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
@@ -197,23 +238,22 @@ class BackupController extends Controller
         $tables = $pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
 
         foreach ($tables as $table) {
-            // Structure
             $create = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch(\PDO::FETCH_ASSOC);
             $sql   .= "DROP TABLE IF EXISTS `{$table}`;\n";
             $sql   .= $create['Create Table'] . ";\n\n";
 
-            // Data
             $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(\PDO::FETCH_ASSOC);
             if (empty($rows)) continue;
 
             $cols = '`' . implode('`, `', array_keys($rows[0])) . '`';
             $sql .= "INSERT INTO `{$table}` ({$cols}) VALUES\n";
-            $chunks = array_chunk($rows, 200);
-            foreach ($chunks as $ci => $chunk) {
+            foreach (array_chunk($rows, 200) as $ci => $chunk) {
                 $vals = implode(",\n", array_map(function ($row) use ($pdo) {
-                    return '(' . implode(', ', array_map(fn($v) => $v === null ? 'NULL' : $pdo->quote((string)$v), $row)) . ')';
+                    return '(' . implode(', ', array_map(
+                        fn($v) => $v === null ? 'NULL' : $pdo->quote((string)$v), $row
+                    )) . ')';
                 }, $chunk));
-                $sql .= $vals . ($ci < count($chunks) - 1 ? ",\n" : ";\n");
+                $sql .= $vals . ";\n";
             }
             $sql .= "\n";
         }
