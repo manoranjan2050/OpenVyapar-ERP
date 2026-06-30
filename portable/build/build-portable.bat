@@ -33,57 +33,58 @@ echo.
 echo  [STEP 1/6] Checking prerequisites...
 echo.
 
-set ERRORS=0
+set "MISSING_LIST="
+set "COMPOSER_CMD=composer"
 
 node --version >nul 2>&1
 if errorlevel 1 (
     echo    [MISSING] Node.js  -  https://nodejs.org
-    set /a ERRORS+=1
+    set "MISSING_LIST=%MISSING_LIST% Node.js"
 ) else (
     for /f "delims=" %%v in ('node --version 2^>nul') do echo    [OK] Node.js %%v
 )
 
-npm --version >nul 2>&1
+call npm --version >nul 2>&1
 if errorlevel 1 (
-    echo    [MISSING] npm  (comes with Node.js)
-    set /a ERRORS+=1
+    echo    [MISSING] npm  (comes with Node.js^)
+    set "MISSING_LIST=%MISSING_LIST% npm"
 ) else (
     for /f "delims=" %%v in ('npm --version 2^>nul') do echo    [OK] npm %%v
 )
 
-composer --version >nul 2>&1
-if errorlevel 1 (
-    echo    [MISSING] Composer  -  https://getcomposer.org
-    set /a ERRORS+=1
+:: Composer - always use portable PHP + phar (avoids system php.ini conflicts)
+if exist "%BUILD_DIR%composer.phar" (
+    echo    [OK] composer.phar found locally
 ) else (
-    echo    [OK] Composer found
+    echo    [i] composer.phar absent - will download at Step 4
 )
 
 powershell -Command "exit 0" >nul 2>&1
 if errorlevel 1 (
-    echo    [MISSING] PowerShell  (required for download + zip)
-    set /a ERRORS+=1
+    echo    [MISSING] PowerShell
+    set "MISSING_LIST=%MISSING_LIST% PowerShell"
 ) else (
     echo    [OK] PowerShell found
 )
 
 if not exist "%BACKEND%\artisan" (
     echo    [MISSING] Backend not found at: %BACKEND%
-    set /a ERRORS+=1
+    set "MISSING_LIST=%MISSING_LIST% Backend"
 ) else (
     echo    [OK] Backend found
 )
 
 if not exist "%FRONTEND%\package.json" (
     echo    [MISSING] Frontend not found at: %FRONTEND%
-    set /a ERRORS+=1
+    set "MISSING_LIST=%MISSING_LIST% Frontend"
 ) else (
     echo    [OK] Frontend found
 )
 
 echo.
-if %ERRORS% GTR 0 (
-    echo  [ERROR] %ERRORS% prerequisite(s) missing. Fix them and re-run.
+if defined MISSING_LIST (
+    echo  [ERROR] Missing:%MISSING_LIST%
+    echo  Fix the above and re-run.
     echo.
     pause
     exit /b 1
@@ -156,8 +157,20 @@ echo.
 
 cd /d "%BACKEND%"
 
-echo  Running: composer install --no-dev --optimize-autoloader
-call composer install --no-dev --optimize-autoloader
+:: Download composer.phar if needed
+if not exist "%BUILD_DIR%composer.phar" (
+    echo  Downloading composer.phar...
+    powershell -Command "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -Uri 'https://getcomposer.org/composer-stable.phar' -OutFile '%BUILD_DIR%composer.phar'"
+    if not exist "%BUILD_DIR%composer.phar" (
+        echo  [ERROR] Failed to download composer.phar. Check internet connection.
+        pause
+        exit /b 1
+    )
+    echo  composer.phar downloaded.
+)
+
+echo  Running composer install --no-dev --optimize-autoloader
+call "%PHP_DIR%\php.exe" "%BUILD_DIR%composer.phar" install --no-dev --optimize-autoloader
 if errorlevel 1 (
     echo  [ERROR] composer install failed.
     pause
