@@ -270,6 +270,26 @@ if exist "%PORTABLE%config\env.portable" (
     echo  .env applied from config\env.portable
 )
 
+:: Generate APP_KEY and write into the copied .env
+cd /d "%APP_DIR%"
+for /f "delims=" %%K in ('"%PHP_DIR%\php.exe" artisan key:generate --show 2^>nul') do set "GENERATED_KEY=%%K"
+if defined GENERATED_KEY (
+    powershell -Command "(Get-Content '.env') -replace '^APP_KEY=.*', 'APP_KEY=%GENERATED_KEY%' | Set-Content '.env'"
+    echo  APP_KEY generated and written to .env
+) else (
+    echo  [WARNING] Could not generate APP_KEY - run manually after extracting.
+)
+
+:: Run migrations and seed demo data into portable SQLite
+echo  Running migrations and seeding demo data...
+call "%PHP_DIR%\php.exe" artisan migrate --seed --force >nul 2>&1
+if errorlevel 1 (
+    echo  [WARNING] migrate --seed had errors. Check logs after launch.
+) else (
+    echo  Database seeded OK.
+    echo  Default login: admin@openvyapar.in / password
+)
+
 echo  Config OK.
 echo.
 
