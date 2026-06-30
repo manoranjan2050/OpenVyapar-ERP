@@ -15,7 +15,14 @@
 
 A complete, production-ready ERP system built specifically for Indian small businesses and retailers. GST-compliant invoicing, real-time inventory, party ledger, Telegram/email alerts, Tally export, and much more — all in one beautiful, dark-mode-ready interface.
 
-[🚀 Get Started](#-quick-start) · [📸 Screenshots](#-screenshots) · [✨ Features](#-features) · [🛠️ Tech Stack](#️-tech-stack) · [🤝 Contributing](#-contributing)
+[🚀 Get Started](#-quick-start) · [💻 Portable](#-portable-edition-windows) · [📸 Screenshots](#-screenshots) · [✨ Features](#-features) · [🛠️ Tech Stack](#️-tech-stack) · [🤝 Contributing](#-contributing)
+
+</div>
+
+> **Default login** &nbsp;→&nbsp; Email: `admin@demo.com` &nbsp;·&nbsp; Password: `password`
+> *(Change the password after first login — Settings → Users)*
+
+<div align="center">
 
 </div>
 
@@ -194,6 +201,26 @@ A complete, production-ready ERP system built specifically for Indian small busi
 
 ---
 
+## 💻 Portable Edition (Windows)
+
+No installation needed — extract and run.
+
+1. Download `OpenVyapar-ERP-Portable-v1.0.0-Windows.zip` from [Releases](https://github.com/manoranjan2050/OpenVyapar-ERP/releases)
+2. Extract the ZIP anywhere (e.g. `D:\OpenVyapar\`)
+3. Double-click **`OpenVyapar.exe`** (GUI launcher) — or run `start.bat` for console mode
+4. The app opens automatically in your browser at `http://localhost:8000`
+
+**Default login credentials (Portable):**
+
+| Field | Value |
+|---|---|
+| Email | `admin@demo.com` |
+| Password | `password` |
+
+> The portable edition uses **SQLite** (no MySQL needed). All data is stored in `app\database\database.sqlite` inside the extracted folder. Back up that file to keep your data safe.
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -248,11 +275,14 @@ npm run dev
 http://localhost:5173
 ```
 
-**Default credentials:**
-```
-Email:    admin@demo.com
-Password: password
-```
+**Default login credentials:**
+
+| Field | Value |
+|---|---|
+| Email | `admin@demo.com` |
+| Password | `password` |
+
+> **Change the password** immediately after first login via Settings → Users.
 
 ### Docker (alternative)
 ```bash
@@ -343,7 +373,7 @@ Contributions are welcome! Please:
 
 <div align="center">
 
-**Manoranjan Kumar (Manoranjan Das)**
+**MANORANJAN**
 
 [![GitHub](https://img.shields.io/badge/GitHub-manoranjan2050-181717?style=flat-square&logo=github)](https://github.com/manoranjan2050)
 [![Email](https://img.shields.io/badge/Email-manoranjan2050@live.com-0078D4?style=flat-square&logo=microsoftoutlook)](mailto:manoranjan2050@live.com)
