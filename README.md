@@ -205,7 +205,7 @@ A complete, production-ready ERP system built specifically for Indian small busi
 
 No installation needed — extract and run.
 
-1. Download `OpenVyapar-ERP-Portable-v1.0.0-Windows.zip` from [Releases](https://github.com/manoranjan2050/OpenVyapar-ERP/releases)
+1. Download `OpenVyapar-ERP-Portable-v1.2.0-Windows.zip` from [Releases](https://github.com/manoranjan2050/OpenVyapar-ERP/releases)
 2. Extract the ZIP anywhere (e.g. `D:\OpenVyapar\`)
 3. Double-click **`OpenVyapar.exe`** (GUI launcher) — or run `start.bat` for console mode
 4. The app opens automatically in your browser at `http://localhost:8000`

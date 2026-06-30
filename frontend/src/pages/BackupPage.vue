@@ -85,10 +85,14 @@
               <td class="px-4 py-3 text-gray-500 text-xs font-mono">{{ b.created_at?.slice(0, 16) }}</td>
               <td class="px-4 py-3 text-right">
                 <div class="flex items-center justify-end gap-1">
-                  <a :href="`${apiBase}/api/backups/download/${b.filename}`" target="_blank"
+                  <button @click="syncBackup(b.filename)" :disabled="syncing === b.filename"
+                     class="text-xs px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-semibold transition-all">
+                    {{ syncing === b.filename ? 'Syncing…' : '☁ Sync' }}
+                  </button>
+                  <button @click="downloadBackup(b.filename)"
                      class="text-xs px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-semibold transition-all">
                     Download
-                  </a>
+                  </button>
                   <button @click="deleteBackup(b.filename)" class="text-gray-300 hover:text-rose-500 p-1 transition-colors">
                     <Trash2Icon class="w-4 h-4" />
                   </button>
@@ -264,6 +268,7 @@ const bStats      = ref<any>({})
 const bSettings   = ref<any>({ auto_backup_enabled: false, auto_backup_interval: 'daily', keep_last: 10, backup_on_close: true })
 const creating    = ref(false)
 const restoring   = ref(false)
+const syncing     = ref<string | null>(null)
 const restoreFile = ref<File | null>(null)
 const flash       = ref('')
 const flashType   = ref<'ok'|'err'>('ok')
@@ -300,14 +305,59 @@ async function createBackup(label = 'manual') {
     const { data } = await api.post('/backups/create', { label })
     showFlash(`✓ ${data.message} · ${data.size_human}`)
     await loadBackups(); await loadStats()
+    // Auto-sync to enabled cloud providers in background
+    api.post('/backup-sync/sync-now', { filename: data.filename })
+      .then(r => {
+        const results = r.data.results ?? {}
+        const synced = Object.keys(results).filter(k => results[k].ok)
+        if (synced.length) showFlash(`✓ Backup synced to: ${synced.join(', ')}`)
+      })
+      .catch(() => {}) // non-fatal
   } catch { showFlash('Backup failed. Check server logs.', 'err') }
   finally { creating.value = false }
 }
 
+async function downloadBackup(filename: string) {
+  try {
+    const res = await api.get(`/backups/download/${filename}`, { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([res.data], { type: 'application/zip' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch {
+    showFlash('Download failed.', 'err')
+  }
+}
+
 async function deleteBackup(filename: string) {
+  if (!confirm(`Delete backup "${filename}"?`)) return
   await api.delete(`/backups/${filename}`)
   showFlash('Backup deleted.')
   loadBackups(); loadStats()
+}
+
+async function syncBackup(filename: string) {
+  syncing.value = filename
+  try {
+    const { data } = await api.post('/backup-sync/sync-now', { filename })
+    const results = data.results ?? {}
+    const failed  = Object.entries(results).filter(([, r]: any) => !r.ok)
+    if (failed.length) {
+      showFlash(`Sync partial: ${failed.map(([p]) => p).join(', ')} failed`, 'err')
+    } else if (Object.keys(results).length === 0) {
+      showFlash('No sync providers enabled. Go to Cloud Sync settings to configure.')
+    } else {
+      showFlash(`Synced to ${Object.keys(results).join(', ')} ✓`)
+    }
+  } catch (e: any) {
+    showFlash(e.response?.data?.message ?? 'Sync failed', 'err')
+  } finally {
+    syncing.value = null
+  }
 }
 
 async function saveSettings() {
