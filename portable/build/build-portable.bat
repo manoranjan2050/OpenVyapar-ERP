@@ -310,8 +310,8 @@ echo.
 echo   ZIP  : %ZIP%
 echo   Size : ~%ZIP_MB% MB
 echo.
-echo   Extract and double-click OpenVyapar.exe  (GUI launcher^)
-  Or run start.bat for console mode!
+echo   Extract and double-click OpenVyapar.exe  to launch
+echo   start.bat also works for console/debug mode
 echo  ===========================================================
 echo.
 pause
