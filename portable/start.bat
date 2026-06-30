@@ -1,14 +1,7 @@
 @echo off
 title OpenVyapar ERP - Starting...
 color 0A
-chcp 65001 >nul
 setlocal EnableDelayedExpansion
-
-:: ─────────────────────────────────────────
-::  OpenVyapar ERP - Portable Launcher
-::  Developer: MANORANJAN
-::  https://manoranjan.dev | AGPL v3
-:: ─────────────────────────────────────────
 
 :: ROOT is the folder this .bat lives in
 set "ROOT=%~dp0"
@@ -26,14 +19,14 @@ echo ^| (_) ^| '_ \/ -_) ' \ \ V / _` / _` ^| '_ \/ _` ^| '_^|
 echo  \___/^| .__/\___ _^|^|_^| \_/\__,_\__,_^| .__/\__,_^|_^|
 echo       ^|_^|                             ^|_^|
 echo.
-echo  ─────────────────────────────────────────────────────────────
+echo  -----------------------------------------------------------
 echo   Free ^& Open-Source GST ERP  ^|  Portable Edition  ^|  v1.0.0
 echo   Developer : MANORANJAN  ^|  https://manoranjan.dev
 echo   License   : AGPL v3    ^|  github.com/manoranjan2050
-echo  ─────────────────────────────────────────────────────────────
+echo  -----------------------------------------------------------
 echo.
 
-:: ── Check PHP ──────────────────────────────────────────────────
+:: Check PHP
 if not exist "%PHP%" (
     echo  [!] PHP not found. Downloading now...
     echo.
@@ -50,7 +43,7 @@ if not exist "%PHP%" (
     )
 )
 
-:: ── Check app ──────────────────────────────────────────────────
+:: Check app
 if not exist "%APP%\artisan" (
     echo  [ERROR] Laravel app folder not found.
     echo  Expected: %APP%\artisan
@@ -63,7 +56,7 @@ if not exist "%APP%\artisan" (
     exit /b 1
 )
 
-:: ── Check frontend ─────────────────────────────────────────────
+:: Check frontend
 if not exist "%WWW%\index.html" (
     echo  [ERROR] Frontend folder not found.
     echo  Expected: %WWW%\index.html
@@ -72,7 +65,7 @@ if not exist "%WWW%\index.html" (
     exit /b 1
 )
 
-:: ── First-run setup ────────────────────────────────────────────
+:: First-run setup
 if not exist "%ROOT%.installed" (
     echo  [SETUP] First launch detected. Running setup...
     echo.
@@ -87,60 +80,58 @@ if not exist "%ROOT%.installed" (
     echo.
 )
 
-:: ── Already running? ───────────────────────────────────────────
+:: Already running?
 if exist "%ROOT%.running" (
     echo  [i] OpenVyapar ERP is already running.
     start "" "http://localhost:%PORT_UI%"
     exit /b 0
 )
 
-:: ── Set PHP in PATH ────────────────────────────────────────────
+:: Set PHP in PATH
 set "PATH=%ROOT%php;%PATH%"
 
-:: ── Create logs dir ────────────────────────────────────────────
+:: Create logs dir
 if not exist "%ROOT%logs" mkdir "%ROOT%logs"
 
-:: ── Write lock ─────────────────────────────────────────────────
+:: Write lock
 echo running > "%ROOT%.running"
 
-:: ── Start API server ───────────────────────────────────────────
-echo  [1/2] Starting API server   ^> http://localhost:%PORT_API% ...
-start "OV-API" /min cmd /c ^
-    "cd /d "%APP%" && "%PHP%" -S localhost:%PORT_API% -t public public\index.php >> "%ROOT%logs\api.log" 2>&1"
+:: Start API server
+echo  [1/2] Starting API server  ^> http://localhost:%PORT_API% ...
+start "OV-API" /min cmd /c "cd /d "%APP%" && "%PHP%" -S localhost:%PORT_API% -t public public\index.php >> "%ROOT%logs\api.log" 2>&1"
 
-:: ── Start frontend static server ───────────────────────────────
-echo  [2/2] Starting UI  server   ^> http://localhost:%PORT_UI% ...
-start "OV-UI" /min cmd /c ^
-    ""%PHP%" -S localhost:%PORT_UI% -t "%WWW%" >> "%ROOT%logs\ui.log" 2>&1"
+:: Start frontend static server
+echo  [2/2] Starting UI  server  ^> http://localhost:%PORT_UI% ...
+start "OV-UI" /min cmd /c ""%PHP%" -S localhost:%PORT_UI% -t "%WWW%" >> "%ROOT%logs\ui.log" 2>&1"
 
-:: ── Wait for servers ───────────────────────────────────────────
+:: Wait for servers
 echo.
 echo  Waiting for servers to be ready...
 timeout /t 3 /nobreak >nul
 
-:: ── Open browser ───────────────────────────────────────────────
+:: Open browser
 start "" "http://localhost:%PORT_UI%"
 
-:: ── Ready banner ───────────────────────────────────────────────
+:: Ready banner
 echo.
-echo  ════════════════════════════════════════════════════════════
+echo  ===========================================================
 echo.
 echo    OpenVyapar ERP is running!
 echo.
 echo    App   :  http://localhost:%PORT_UI%
 echo    API   :  http://localhost:%PORT_API%
 echo.
-echo    Login :  admin@demo.com
+echo    Login :  admin@openvyapar.in
 echo    Pass  :  password
 echo.
-echo    Close this window OR press any key to STOP the server.
+echo    Close this window OR press any key to STOP the servers.
 echo.
-echo  ════════════════════════════════════════════════════════════
+echo  ===========================================================
 echo.
 
 pause >nul
 
-:: ── Stop on exit ───────────────────────────────────────────────
+:: Stop on exit
 call "%ROOT%stop.bat" silent
 echo.
 echo  OpenVyapar ERP stopped. Goodbye!

@@ -1,17 +1,17 @@
-﻿@echo off
+@echo off
 title OpenVyapar ERP - First Time Setup
 setlocal EnableDelayedExpansion
 
-:: Called by start.bat â€” ROOT is portable\ (one level up from launcher\)
+:: Called by start.bat - ROOT is portable\ (one level up from launcher\)
 set "ROOT=%~dp0..\"
 set "PHP=%ROOT%php\php.exe"
 set "APP=%ROOT%app"
 
 if not exist "%ROOT%logs" mkdir "%ROOT%logs"
 
-echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo  -------------------------------------------
 echo   OpenVyapar ERP - First Time Setup
-echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo  -------------------------------------------
 echo.
 
 :: 1. Create SQLite database file
@@ -27,8 +27,6 @@ if not exist "%APP%\database\openvyapar.sqlite" (
 :: 2. Write .env (SQLite, portable config)
 echo  [2/5] Writing configuration (.env)...
 set "DB_PATH=%APP%\database\openvyapar.sqlite"
-:: Use forward slashes for Laravel
-set "DB_PATH_FWD=%DB_PATH:\=/%"
 
 (
 echo APP_NAME=OpenVyapar
@@ -86,10 +84,9 @@ if errorlevel 1 (
 echo Installed on %date% %time% > "%ROOT%.installed"
 
 echo.
-echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo  -------------------------------------------
 echo   Setup complete!
-echo   Login: admin@demo.com  /  password
-echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+echo   Login: admin@openvyapar.in  /  password
+echo  -------------------------------------------
 echo.
 exit /b 0
-
