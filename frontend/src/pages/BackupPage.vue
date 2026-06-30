@@ -85,10 +85,10 @@
               <td class="px-4 py-3 text-gray-500 text-xs font-mono">{{ b.created_at?.slice(0, 16) }}</td>
               <td class="px-4 py-3 text-right">
                 <div class="flex items-center justify-end gap-1">
-                  <a :href="`${apiBase}/api/backups/download/${b.filename}`" target="_blank"
+                  <button @click="downloadBackup(b.filename)"
                      class="text-xs px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-semibold transition-all">
                     Download
-                  </a>
+                  </button>
                   <button @click="deleteBackup(b.filename)" class="text-gray-300 hover:text-rose-500 p-1 transition-colors">
                     <Trash2Icon class="w-4 h-4" />
                   </button>
@@ -304,7 +304,24 @@ async function createBackup(label = 'manual') {
   finally { creating.value = false }
 }
 
+async function downloadBackup(filename: string) {
+  try {
+    const res = await api.get(`/backups/download/${filename}`, { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([res.data], { type: 'application/zip' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch {
+    showFlash('Download failed.', 'err')
+  }
+}
+
 async function deleteBackup(filename: string) {
+  if (!confirm(`Delete backup "${filename}"?`)) return
   await api.delete(`/backups/${filename}`)
   showFlash('Backup deleted.')
   loadBackups(); loadStats()

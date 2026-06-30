@@ -64,11 +64,16 @@
               </span>
             </td>
             <td class="table-cell text-right">
-              <button @click="openForm(c)"
-                class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400
-                       hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-all">
-                <EditIcon class="w-3.5 h-3.5" /> Edit
-              </button>
+              <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <button @click.stop="openForm(c)"
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700">
+                  <EditIcon class="w-3.5 h-3.5" /> Edit
+                </button>
+                <button @click.stop="deleteCustomer(c)"
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-rose-500 hover:text-rose-700">
+                  <Trash2Icon class="w-3.5 h-3.5" /> Delete
+                </button>
+              </div>
             </td>
           </tr>
           <tr v-if="!customers.length">
@@ -165,7 +170,7 @@
 import { ref, onMounted } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import api from '../api/client'
-import { PlusIcon, SearchIcon, EditIcon, UsersIcon, XIcon, AlertCircleIcon } from 'lucide-vue-next'
+import { PlusIcon, SearchIcon, EditIcon, UsersIcon, XIcon, AlertCircleIcon, Trash2Icon } from 'lucide-vue-next'
 
 const customers = ref<any[]>([])
 const search = ref('')
@@ -209,6 +214,16 @@ async function saveCustomer() {
     formError.value = e.response?.data?.message ?? 'Error saving.'
   } finally {
     saving.value = false
+  }
+}
+
+async function deleteCustomer(c: any) {
+  if (!confirm(`Delete customer "${c.name}"? This cannot be undone.`)) return
+  try {
+    await api.delete(`/customers/${c.id}`)
+    await loadCustomers()
+  } catch (e: any) {
+    alert(e.response?.data?.message ?? 'Delete failed.')
   }
 }
 

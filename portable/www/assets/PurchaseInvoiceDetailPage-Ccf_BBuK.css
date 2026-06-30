@@ -1,0 +1,1 @@
+@media print{body>*,#app>*{display:none!important}#printable-invoice{width:100%;top:0;left:0;color:#000!important;background:#fff!important;display:block!important;position:fixed!important}}.modal-enter-active[data-v-a1ed499e],.modal-leave-active[data-v-a1ed499e]{transition:all .25s}.modal-enter-from[data-v-a1ed499e],.modal-leave-to[data-v-a1ed499e]{opacity:0}

@@ -100,10 +100,15 @@
               <span :class="statusBadge(inv.status)" class="capitalize">{{ inv.status?.replace('_', ' ') }}</span>
             </td>
             <td class="table-cell text-right">
-              <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400
-                           opacity-0 group-hover:opacity-100 transition-all">
-                <EyeIcon class="w-3.5 h-3.5" /> View
-              </span>
+              <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  <EyeIcon class="w-3.5 h-3.5" /> View
+                </span>
+                <button @click.stop="deleteInvoice(inv)"
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-rose-500 hover:text-rose-700">
+                  <Trash2Icon class="w-3.5 h-3.5" /> Delete
+                </button>
+              </div>
             </td>
           </tr>
 
@@ -131,7 +136,7 @@ import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 import api from '../api/client'
-import { PlusIcon, SearchIcon, ReceiptIcon, EyeIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon, XCircleIcon, DownloadIcon } from 'lucide-vue-next'
+import { PlusIcon, SearchIcon, ReceiptIcon, EyeIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon, XCircleIcon, DownloadIcon, Trash2Icon } from 'lucide-vue-next'
 import * as XLSX from 'xlsx'
 
 const invoices = ref<any[]>([])
@@ -194,6 +199,16 @@ const statusBadge = (s: string) => ({
   draft: 'badge-gray', confirmed: 'badge-blue',
   partially_paid: 'badge-yellow', paid: 'badge-green', cancelled: 'badge-red',
 }[s] ?? 'badge-gray')
+
+async function deleteInvoice(inv: any) {
+  if (!confirm(`Delete invoice ${inv.invoice_number}? This cannot be undone.`)) return
+  try {
+    await api.delete(`/sales-invoices/${inv.id}`)
+    await loadInvoices()
+  } catch (e: any) {
+    alert(e.response?.data?.message ?? 'Delete failed.')
+  }
+}
 
 onMounted(() => loadInvoices())
 </script>

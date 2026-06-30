@@ -301,7 +301,7 @@ echo.
 set "DIST=%PORTABLE%dist"
 if not exist "%DIST%" mkdir "%DIST%"
 
-set "ZIP=%DIST%\OpenVyapar-ERP-Portable-v1.0.0-Windows.zip"
+set "ZIP=%DIST%\OpenVyapar-ERP-Portable-v1.2.0-Windows.zip"
 if exist "%ZIP%" del /f "%ZIP%"
 
 :: Copy launcher exe to portable root so it sits next to start.bat

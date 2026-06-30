@@ -104,12 +104,17 @@
               </span>
             </td>
             <td class="table-cell text-right">
-              <RouterLink :to="`/products/${p.id}/edit`"
-                class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400
-                       hover:text-blue-700 dark:hover:text-blue-300 opacity-0 group-hover:opacity-100 transition-all">
-                <EditIcon class="w-3.5 h-3.5" />
-                Edit
-              </RouterLink>
+              <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <RouterLink :to="`/products/${p.id}/edit`"
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                  <EditIcon class="w-3.5 h-3.5" />
+                  Edit
+                </RouterLink>
+                <button @click.stop="deleteProduct(p)"
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-rose-500 hover:text-rose-700">
+                  <Trash2Icon class="w-3.5 h-3.5" /> Delete
+                </button>
+              </div>
             </td>
           </tr>
 
@@ -209,7 +214,7 @@ import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 import api from '../api/client'
-import { PlusIcon, SearchIcon, EditIcon, PackageIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, UploadIcon, FileDownIcon } from 'lucide-vue-next'
+import { PlusIcon, SearchIcon, EditIcon, PackageIcon, ChevronLeftIcon, ChevronRightIcon, DownloadIcon, UploadIcon, FileDownIcon, Trash2Icon } from 'lucide-vue-next'
 import * as XLSX from 'xlsx'
 
 const products = ref<any[]>([])
@@ -351,6 +356,16 @@ async function handleImport(event: Event) {
 
   importing.value = false
   importResult.value = result
+}
+
+async function deleteProduct(p: any) {
+  if (!confirm(`Delete product "${p.name}"? This cannot be undone.`)) return
+  try {
+    await api.delete(`/products/${p.id}`)
+    await fetchPage()
+  } catch (e: any) {
+    alert(e.response?.data?.message ?? 'Delete failed.')
+  }
 }
 
 onMounted(() => fetchPage())
