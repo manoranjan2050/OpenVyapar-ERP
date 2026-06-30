@@ -270,6 +270,25 @@ if exist "%PORTABLE%config\env.portable" (
     echo  .env applied from config\env.portable
 )
 
+:: Generate APP_KEY directly into .env (no --show avoids ANSI color codes)
+cd /d "%APP_DIR%"
+call "%PHP_DIR%\php.exe" artisan key:generate --force >nul 2>&1
+if errorlevel 1 (
+    echo  [WARNING] Could not generate APP_KEY.
+) else (
+    echo  APP_KEY generated.
+)
+
+:: Run migrations and seed demo data into portable SQLite
+echo  Running migrations and seeding demo data...
+call "%PHP_DIR%\php.exe" artisan migrate --seed --force >nul 2>&1
+if errorlevel 1 (
+    echo  [WARNING] migrate --seed had errors. Check logs after launch.
+) else (
+    echo  Database seeded OK.
+    echo  Default login: admin@openvyapar.in / password
+)
+
 echo  Config OK.
 echo.
 
