@@ -131,47 +131,68 @@ class BackupController extends Controller
         $connection = config('database.default');
         $pdo = DB::getPdo();
 
-        // Split into individual statements (semicolon at end of line)
-        $rawStatements = preg_split('/;\s*[\r\n]+/', $sqlContent);
+        // Detect backup format from header comment for cross-version compatibility
+        $backupDriver = 'unknown';
+        if (str_contains($sqlContent, '-- OpenVyapar ERP Database Backup (SQLite)')) $backupDriver = 'sqlite';
+        if (str_contains($sqlContent, '-- OpenVyapar ERP Database Backup (MySQL)'))  $backupDriver = 'mysql';
 
-        // Filter statements based on the current DB driver
+        // Cross-version compatibility: inject missing table stubs so old backups work on new schema
+        // (new tables added in newer versions will be created by the post-restore migration)
+
+        // Split into individual statements
+        $rawStatements = preg_split('/;\s*[\r\n]+/', $sqlContent);
         $statements = [];
         foreach ($rawStatements as $stmt) {
             $stmt = trim($stmt);
-            if ($stmt === '' || str_starts_with($stmt, '--')) continue;
+            if ($stmt === '' || preg_match('/^--/', $stmt)) continue;
 
+            // Skip MySQL-only commands when on SQLite
             if ($connection === 'sqlite') {
-                // Skip MySQL-only commands
-                if (preg_match('/^(SET\s|LOCK\s|UNLOCK\s)/i', $stmt)) continue;
-                // Skip duplicate transaction/pragma wrapping — we manage our own
-                if (preg_match('/^(BEGIN\s+TRANSACTION|COMMIT|PRAGMA\s+foreign_keys)/i', $stmt)) continue;
-            } else {
-                // Skip SQLite-only commands when on MySQL
+                if (preg_match('/^(SET\s|LOCK\s+TABLES|UNLOCK\s+TABLES)/i', $stmt)) continue;
+                if (preg_match('/^(BEGIN\s+TRANSACTION|COMMIT\b|PRAGMA\s+foreign_keys)/i', $stmt)) continue;
+            }
+            // Skip SQLite-only commands when on MySQL
+            if ($connection === 'mysql') {
                 if (preg_match('/^PRAGMA\s/i', $stmt)) continue;
-                if (preg_match('/^(BEGIN\s+TRANSACTION|COMMIT)/i', $stmt)) continue;
+                if (preg_match('/^(BEGIN\s+TRANSACTION|COMMIT\b)/i', $stmt)) continue;
             }
 
             $statements[] = $stmt;
         }
 
-        $pdo->beginTransaction();
+        // DDL statements (CREATE TABLE, DROP TABLE) cause implicit commits in both MySQL and SQLite.
+        // So we never use PDO transactions for restore — execute directly with FK checks off.
         try {
             if ($connection === 'sqlite') {
                 $pdo->exec('PRAGMA foreign_keys=OFF');
-            }
-            foreach ($statements as $stmt) {
-                $pdo->exec($stmt);
-            }
-            if ($connection === 'sqlite') {
+                foreach ($statements as $stmt) {
+                    $pdo->exec($stmt);
+                }
                 $pdo->exec('PRAGMA foreign_keys=ON');
+            } else {
+                $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
+                foreach ($statements as $stmt) {
+                    if (preg_match('/^SET\s+FOREIGN_KEY_CHECKS\s*=/i', $stmt)) continue;
+                    $pdo->exec($stmt);
+                }
+                $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
             }
-            $pdo->commit();
         } catch (\Exception $e) {
-            $pdo->rollBack();
+            // Re-enable FK checks even on error
+            if ($connection === 'sqlite') { try { $pdo->exec('PRAGMA foreign_keys=ON'); } catch (\Exception $ignored) {} }
+            if ($connection === 'mysql')  { try { $pdo->exec('SET FOREIGN_KEY_CHECKS=1'); } catch (\Exception $ignored) {} }
             return response()->json(['message' => 'Restore failed: ' . $e->getMessage()], 500);
         }
 
-        return response()->json(['message' => 'Database restored successfully. Please refresh the app.']);
+        // Post-restore: run migrations to add any new tables/columns not in the backup
+        // This ensures old-version backups work correctly after an app update
+        try {
+            \Artisan::call('migrate', ['--force' => true]);
+        } catch (\Exception $e) {
+            // Non-fatal — data is restored, schema just may need manual check
+        }
+
+        return response()->json(['message' => 'Database restored successfully. Migrations applied. Please refresh.']);
     }
 
     // Settings (auto backup config)

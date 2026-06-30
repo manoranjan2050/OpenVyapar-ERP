@@ -15,7 +15,7 @@ class ProductController extends Controller
     {
         $companyId = $request->user()->company_id;
 
-        return Product::where('company_id', $companyId)
+        $paginator = Product::where('company_id', $companyId)
             ->with(['category', 'unit'])
             ->when($request->search, fn ($q) => $q->where(function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
@@ -25,6 +25,25 @@ class ProductController extends Controller
             ->when($request->category_id, fn ($q) => $q->where('category_id', $request->category_id))
             ->when($request->active_only, fn ($q) => $q->where('is_active', true))
             ->paginate($request->per_page ?? 25);
+
+        // Attach current_stock to every product using a single subquery per page
+        $ids = $paginator->pluck('id')->toArray();
+        if ($ids) {
+            $stockMap = \DB::table('stock_transactions')
+                ->selectRaw('product_id, balance_after')
+                ->whereIn('product_id', $ids)
+                ->orderByDesc('transacted_at')
+                ->get()
+                ->groupBy('product_id')
+                ->map(fn($rows) => $rows->first()->balance_after);
+
+            $paginator->getCollection()->transform(function ($p) use ($stockMap) {
+                $p->current_stock = isset($stockMap[$p->id]) ? (int) $stockMap[$p->id] : ($p->opening_stock ?? 0);
+                return $p;
+            });
+        }
+
+        return $paginator;
     }
 
     public function store(Request $request)

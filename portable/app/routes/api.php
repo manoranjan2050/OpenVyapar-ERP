@@ -75,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Stock Adjustments
     Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index']);
     Route::post('/stock-adjustments', [StockAdjustmentController::class, 'store']);
+    Route::get('/stock-adjustments/history/{product}', [StockAdjustmentController::class, 'history']);
 
     // Credit Notes
     Route::get('/credit-notes', [CreditNoteController::class, 'index']);

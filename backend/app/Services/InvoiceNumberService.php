@@ -15,7 +15,7 @@ class InvoiceNumberService
     {
         $prefix = $company->settings()->where('key', 'invoice_prefix')->value('value') ?? 'INV';
         $fyCode = substr($fy->start_date->format('Y'), 2) . '-' . substr($fy->end_date->format('Y'), 2);
-        $last = SalesInvoice::where('company_id', $company->id)
+        $last = SalesInvoice::withTrashed()->where('company_id', $company->id)
             ->where('financial_year_id', $fy->id)
             ->lockForUpdate()
             ->count();
@@ -25,7 +25,7 @@ class InvoiceNumberService
     public function nextPurchaseNumber(Company $company, FinancialYear $fy): string
     {
         $fyCode = substr($fy->start_date->format('Y'), 2) . '-' . substr($fy->end_date->format('Y'), 2);
-        $last = PurchaseInvoice::where('company_id', $company->id)
+        $last = PurchaseInvoice::withTrashed()->where('company_id', $company->id)
             ->where('financial_year_id', $fy->id)
             ->lockForUpdate()
             ->count();
