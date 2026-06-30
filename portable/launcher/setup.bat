@@ -1,17 +1,17 @@
-@echo off
+﻿@echo off
 title OpenVyapar ERP - First Time Setup
 setlocal EnableDelayedExpansion
 
-:: Called by start.bat — ROOT is portable\ (one level up from launcher\)
+:: Called by start.bat â€” ROOT is portable\ (one level up from launcher\)
 set "ROOT=%~dp0..\"
 set "PHP=%ROOT%php\php.exe"
 set "APP=%ROOT%app"
 
 if not exist "%ROOT%logs" mkdir "%ROOT%logs"
 
-echo  ─────────────────────────────────────────
+echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo   OpenVyapar ERP - First Time Setup
-echo  ─────────────────────────────────────────
+echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo.
 
 :: 1. Create SQLite database file
@@ -47,7 +47,7 @@ echo CACHE_DRIVER=file
 echo SESSION_DRIVER=file
 echo SESSION_LIFETIME=120
 echo.
-echo SANCTUM_STATEFUL_DOMAINS=localhost:8080,localhost:8000
+echo SANCTUM_STATEFUL_DOMAINS=localhost:8000
 echo SESSION_DOMAIN=localhost
 echo.
 echo MAIL_MAILER=log
@@ -86,9 +86,10 @@ if errorlevel 1 (
 echo Installed on %date% %time% > "%ROOT%.installed"
 
 echo.
-echo  ─────────────────────────────────────────
+echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo   Setup complete!
 echo   Login: admin@demo.com  /  password
-echo  ─────────────────────────────────────────
+echo  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 echo.
 exit /b 0
+
