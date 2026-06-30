@@ -1,0 +1,25 @@
+[package]
+name = "openvyapar-launcher"
+version = "1.0.0"
+edition = "2021"
+
+[[bin]]
+name = "OpenVyapar"
+path = "src/main.rs"
+
+[dependencies]
+open = "5"
+winapi = { version = "0.3", features = [
+    "winuser", "wingdi", "shellapi", "commctrl",
+    "libloaderapi", "minwindef", "windef",
+    "processthreadsapi", "handleapi"
+] }
+
+[build-dependencies]
+winres = "0.1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true

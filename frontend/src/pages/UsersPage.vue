@@ -83,41 +83,88 @@
               <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ editUser ? 'Edit User' : 'New User' }}</h3>
               <button @click="showForm = false" class="btn-icon"><XIcon class="w-4 h-4" /></button>
             </div>
+
             <form @submit.prevent="save" class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                  <label class="label">Full Name *</label>
-                  <input v-model="form.name" class="input" required placeholder="Rajesh Kumar" />
-                </div>
-                <div class="col-span-2">
-                  <label class="label">Email *</label>
-                  <input v-model="form.email" type="email" class="input" required placeholder="rajesh@myshop.in" :disabled="!!editUser" />
-                </div>
-                <div>
-                  <label class="label">{{ editUser ? 'New Password' : 'Password *' }}</label>
-                  <input v-model="form.password" type="password" class="input" :required="!editUser" placeholder="Min 6 characters" />
-                </div>
-                <div>
-                  <label class="label">Role *</label>
-                  <select v-model="form.role" class="input" required>
-                    <option value="admin">Admin</option>
-                    <option value="accountant">Accountant</option>
-                    <option value="cashier">Cashier</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                </div>
-                <div v-if="editUser" class="col-span-2 flex items-center gap-3">
-                  <input v-model="form.is_active" type="checkbox" class="w-4 h-4 rounded" id="active" />
-                  <label for="active" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">Account is active</label>
+
+              <!-- Name -->
+              <div>
+                <label class="label">Full Name *</label>
+                <input v-model="form.name" class="input" required placeholder="Rajesh Kumar" />
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label class="label">Email *</label>
+                <input v-model="form.email" type="email" class="input" required
+                       placeholder="rajesh@myshop.in" :disabled="!!editUser" />
+              </div>
+
+              <!-- Password -->
+              <div>
+                <label class="label">{{ editUser ? 'New Password' : 'Password *' }}</label>
+                <div class="relative">
+                  <input v-model="form.password"
+                         :type="showPassword ? 'text' : 'password'"
+                         class="input pr-10"
+                         :required="!editUser"
+                         :placeholder="editUser ? 'Leave blank to keep current' : 'Min 6 characters'" />
+                  <button type="button"
+                          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                          @click="showPassword = !showPassword">
+                    <EyeOffIcon v-if="showPassword" class="w-4 h-4" />
+                    <EyeIcon v-else class="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
+              <!-- Confirm Password (only when password is entered) -->
+              <div v-if="form.password">
+                <label class="label">Confirm Password *</label>
+                <div class="relative">
+                  <input v-model="form.confirmPassword"
+                         :type="showConfirm ? 'text' : 'password'"
+                         class="input pr-10"
+                         :required="!!form.password"
+                         placeholder="Re-enter password" />
+                  <button type="button"
+                          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                          @click="showConfirm = !showConfirm">
+                    <EyeOffIcon v-if="showConfirm" class="w-4 h-4" />
+                    <EyeIcon v-else class="w-4 h-4" />
+                  </button>
+                </div>
+                <!-- Match indicator -->
+                <p v-if="form.confirmPassword" class="text-xs mt-1"
+                   :class="passwordsMatch ? 'text-emerald-600' : 'text-rose-500'">
+                  {{ passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match' }}
+                </p>
+              </div>
+
+              <!-- Role -->
+              <div>
+                <label class="label">Role *</label>
+                <select v-model="form.role" class="input" required>
+                  <option value="admin">Admin — Full access</option>
+                  <option value="accountant">Accountant — Reports & payments</option>
+                  <option value="cashier">Cashier — Invoices only</option>
+                  <option value="viewer">Viewer — Read only</option>
+                </select>
+              </div>
+
+              <!-- Active toggle (edit only) -->
+              <div v-if="editUser" class="flex items-center gap-3">
+                <input v-model="form.is_active" type="checkbox" class="w-4 h-4 rounded" id="active" />
+                <label for="active" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">Account is active</label>
+              </div>
+
+              <!-- Error -->
               <div v-if="error" class="flex items-center gap-2 text-rose-600 text-sm bg-rose-50 dark:bg-rose-900/20 px-3 py-2 rounded-xl">
                 <AlertCircleIcon class="w-4 h-4 flex-shrink-0" /> {{ error }}
               </div>
 
               <div class="flex gap-2 pt-1">
-                <button type="submit" class="btn-primary flex-1 justify-center" :disabled="saving">
+                <button type="submit" class="btn-primary flex-1 justify-center"
+                        :disabled="saving || (!!form.password && !passwordsMatch)">
                   <svg v-if="saving" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -136,10 +183,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import api from '../api/client'
 import { useAuthStore } from '../stores/auth'
-import { PlusIcon, XIcon, AlertCircleIcon, ShieldIcon, CalculatorIcon, CreditCardIcon, EyeIcon } from 'lucide-vue-next'
+import {
+  PlusIcon, XIcon, AlertCircleIcon, ShieldIcon,
+  CalculatorIcon, CreditCardIcon, EyeIcon, EyeOffIcon
+} from 'lucide-vue-next'
 
 const users    = ref<any[]>([])
 const loading  = ref(true)
@@ -149,9 +199,19 @@ const error    = ref('')
 const editUser = ref<any>(null)
 const auth     = useAuthStore()
 
+const showPassword = ref(false)
+const showConfirm  = ref(false)
+
 const currentUserId = computed(() => auth.user?.id)
 
-const form = ref({ name: '', email: '', password: '', role: 'cashier', is_active: true })
+const form = ref({
+  name: '', email: '', password: '', confirmPassword: '',
+  role: 'cashier', is_active: true
+})
+
+const passwordsMatch = computed(() =>
+  form.value.password === form.value.confirmPassword
+)
 
 const roleDefs = [
   { name: 'admin',      bg: 'bg-blue-100 dark:bg-blue-900/30',    color: 'text-blue-600 dark:text-blue-400',    icon: ShieldIcon,     desc: 'Full access to everything' },
@@ -160,24 +220,45 @@ const roleDefs = [
   { name: 'viewer',     bg: 'bg-gray-100 dark:bg-gray-800',        color: 'text-gray-500 dark:text-gray-400',   icon: EyeIcon,        desc: 'Read-only access' },
 ]
 
-const roleColor = (r: string) => ({ admin: 'bg-blue-600', accountant: 'bg-violet-600', cashier: 'bg-emerald-600', viewer: 'bg-gray-400' }[r] ?? 'bg-gray-400')
-const roleBadge = (r: string) => ({ admin: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', accountant: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400', cashier: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', viewer: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }[r] ?? 'bg-gray-100 text-gray-600')
+const roleColor = (r: string) => ({
+  admin: 'bg-blue-600', accountant: 'bg-violet-600',
+  cashier: 'bg-emerald-600', viewer: 'bg-gray-400'
+}[r] ?? 'bg-gray-400')
+
+const roleBadge = (r: string) => ({
+  admin:      'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  accountant: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  cashier:    'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  viewer:     'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+}[r] ?? 'bg-gray-100 text-gray-600')
 
 function openForm(u?: any) {
-  editUser.value = u ?? null
-  error.value    = ''
-  form.value     = u
-    ? { name: u.name, email: u.email, password: '', role: u.role, is_active: u.is_active }
-    : { name: '', email: '', password: '', role: 'cashier', is_active: true }
+  editUser.value     = u ?? null
+  error.value        = ''
+  showPassword.value = false
+  showConfirm.value  = false
+  form.value = u
+    ? { name: u.name, email: u.email, password: '', confirmPassword: '', role: u.role, is_active: u.is_active }
+    : { name: '', email: '', password: '', confirmPassword: '', role: 'cashier', is_active: true }
   showForm.value = true
 }
 
 async function save() {
+  if (form.value.password && !passwordsMatch.value) {
+    error.value = 'Passwords do not match.'
+    return
+  }
   saving.value = true
   error.value  = ''
   try {
-    const payload: any = { ...form.value }
-    if (!payload.password) delete payload.password
+    const payload: any = {
+      name: form.value.name,
+      email: form.value.email,
+      role: form.value.role,
+      is_active: form.value.is_active,
+    }
+    if (form.value.password) payload.password = form.value.password
+
     if (editUser.value) {
       await api.put(`/users/${editUser.value.id}`, payload)
     } else {
@@ -186,8 +267,12 @@ async function save() {
     showForm.value = false
     await loadUsers()
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? Object.values(e.response?.data?.errors ?? {}).flat().join(', ') ?? 'Error saving user.'
-  } finally { saving.value = false }
+    error.value = e.response?.data?.message
+      ?? Object.values(e.response?.data?.errors ?? {}).flat().join(', ')
+      ?? 'Error saving user.'
+  } finally {
+    saving.value = false
+  }
 }
 
 async function deleteUser(u: any) {
