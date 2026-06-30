@@ -32,6 +32,14 @@
       </p>
     </div>
 
+    <!-- Folder picker modal -->
+    <FolderPickerModal
+      v-if="folderPicker.open"
+      :initial-path="folderPicker.currentPath"
+      @select="onFolderSelected"
+      @cancel="folderPicker.open = false"
+    />
+
     <!-- Providers Grid -->
     <div class="grid gap-4 md:grid-cols-2">
       <div v-for="p in providers" :key="p.provider" class="card p-5 space-y-4 animate-fade-up">
@@ -89,10 +97,23 @@
           <template v-if="p.provider === 'local'">
             <div class="space-y-2">
               <label class="label">Backup Folders (main copy + carbon copies)</label>
-              <div v-for="(path, i) in (p.config.paths || [''])" :key="i" class="flex gap-2">
-                <input :value="path" @input="updateLocalPath(p, i, $event.target.value)" class="input text-sm flex-1" :placeholder="i === 0 ? 'C:\\Users\\You\\OneDrive\\Backups (Main copy)' : 'D:\\USB Drive\\Backups (Carbon copy ' + i + ')'" />
-                <button v-if="i > 0" @click="removeLocalPath(p, i)" class="btn-icon text-rose-500"><XIcon class="w-4 h-4" /></button>
-                <span v-else class="text-xs text-gray-400 self-center font-semibold whitespace-nowrap">Main</span>
+              <div v-for="(path, i) in (p.config.paths || [''])" :key="i" class="flex gap-2 items-center">
+                <div class="flex-1 relative">
+                  <input :value="path" @input="updateLocalPath(p, i, ($event.target as HTMLInputElement).value)"
+                    class="input text-sm w-full pr-20 font-mono text-xs"
+                    :placeholder="i === 0 ? 'C:\\Users\\You\\OneDrive\\Backups' : 'D:\\USB Drive\\Backups'" />
+                  <button @click="openFolderPicker(p, i)" title="Browse for folder"
+                    class="absolute right-1 top-1/2 -translate-y-1/2 btn-secondary text-xs px-2 py-1 h-7">
+                    <FolderOpenIcon class="w-3.5 h-3.5 mr-1" />Browse
+                  </button>
+                </div>
+                <span class="text-xs font-bold whitespace-nowrap"
+                  :class="i === 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400'">
+                  {{ i === 0 ? 'Main' : 'Copy ' + i }}
+                </span>
+                <button v-if="i > 0" @click="removeLocalPath(p, i)" class="btn-icon text-rose-500 flex-shrink-0">
+                  <XIcon class="w-4 h-4" />
+                </button>
               </div>
               <button @click="addLocalPath(p)" class="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                 + Add another folder (carbon copy)
@@ -180,13 +201,34 @@ import { ref, onMounted } from 'vue'
 import api from '../api/client'
 import {
   RefreshCwIcon, CheckCircleIcon, AlertCircleIcon, InfoIcon,
-  XIcon, ExternalLinkIcon,
+  XIcon, ExternalLinkIcon, FolderOpenIcon,
   MailIcon, FolderIcon, CloudIcon, GithubIcon
 } from 'lucide-vue-next'
+import FolderPickerModal from '../components/FolderPickerModal.vue'
 
 const flash   = ref('')
 const flashOk = ref(true)
 const providers = ref<any[]>([])
+
+// Folder picker state
+const folderPicker = ref<{ open: boolean; provider: any | null; index: number; currentPath: string }>({
+  open: false, provider: null, index: 0, currentPath: ''
+})
+
+function openFolderPicker(p: any, i: number) {
+  folderPicker.value = {
+    open: true,
+    provider: p,
+    index: i,
+    currentPath: (p.config.paths?.[i] as string) || '~',
+  }
+}
+
+function onFolderSelected(path: string) {
+  const { provider, index } = folderPicker.value
+  if (provider) updateLocalPath(provider, index, path)
+  folderPicker.value.open = false
+}
 
 const providerMeta: Record<string, any> = {
   email:        { label: 'Email Backup',   desc: 'Send backup as email attachment (SMTP)',      icon: MailIcon,     bg: 'bg-blue-50 dark:bg-blue-900/20',    color: 'text-blue-600 dark:text-blue-400' },

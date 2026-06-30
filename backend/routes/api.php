@@ -130,6 +130,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/backup-sync/sync-now',            [BackupSyncController::class, 'syncNow']);
     Route::get('/backup-sync/google/auth-url',      [BackupSyncController::class, 'googleAuthUrl']);
     Route::get('/backup-sync/google/callback',      [BackupSyncController::class, 'googleCallback']);
+    Route::get('/backup-sync/browse-folder',        [BackupSyncController::class, 'browseFolder']);
 
     // Backup & Restore
     Route::get('/backups', [BackupController::class, 'index']);

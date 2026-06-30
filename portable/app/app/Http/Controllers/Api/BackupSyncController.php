@@ -203,4 +203,116 @@ class BackupSyncController extends Controller
         return response('<script>window.opener.postMessage("google_auth_done","*");window.close();</script>', 200)
             ->header('Content-Type', 'text/html');
     }
+
+    // Browse server-side folders for the local folder picker
+    public function browseFolder(Request $request)
+    {
+        $path = $request->query('path', '');
+
+        // Resolve home-dir shortcuts
+        if ($path === '' || $path === '~') {
+            $path = $this->homePath();
+        }
+
+        $path = rtrim(str_replace('/', DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+
+        // Safety: must be absolute, no traversal tricks
+        $real = realpath($path);
+        if ($real === false || !is_dir($real)) {
+            return response()->json(['error' => 'Path not found: ' . $path], 404);
+        }
+
+        // List subdirectories only
+        $dirs = [];
+        try {
+            $items = @scandir($real);
+            if ($items === false) {
+                return response()->json(['error' => 'Cannot read directory (permission denied)'], 403);
+            }
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..') continue;
+                $full = $real . DIRECTORY_SEPARATOR . $item;
+                if (is_dir($full) && !$this->isHidden($item)) {
+                    $dirs[] = [
+                        'name' => $item,
+                        'path' => $full,
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+        // Build breadcrumb
+        $parts      = explode(DIRECTORY_SEPARATOR, $real);
+        $breadcrumb = [];
+        $built      = '';
+        foreach ($parts as $part) {
+            if ($part === '') continue;
+            $built = $built === '' ? $part : $built . DIRECTORY_SEPARATOR . $part;
+            $breadcrumb[] = ['label' => $part, 'path' => $built];
+        }
+
+        // Common quick-access shortcuts
+        $shortcuts = $this->getShortcuts();
+
+        return response()->json([
+            'current'    => $real,
+            'parent'     => dirname($real) !== $real ? dirname($real) : null,
+            'dirs'       => $dirs,
+            'breadcrumb' => $breadcrumb,
+            'shortcuts'  => $shortcuts,
+        ]);
+    }
+
+    private function homePath(): string
+    {
+        // Windows
+        if (PHP_OS_FAMILY === 'Windows') {
+            return getenv('USERPROFILE') ?: getenv('HOMEDRIVE') . getenv('HOMEPATH') ?: 'C:\\';
+        }
+        return getenv('HOME') ?: '/home';
+    }
+
+    private function getShortcuts(): array
+    {
+        $shortcuts = [];
+        if (PHP_OS_FAMILY === 'Windows') {
+            $home = getenv('USERPROFILE') ?: 'C:\\Users\\User';
+            $username = basename($home);
+            $candidates = [
+                ['label' => 'Desktop',    'path' => $home . '\\Desktop'],
+                ['label' => 'Documents',  'path' => $home . '\\Documents'],
+                ['label' => 'Downloads',  'path' => $home . '\\Downloads'],
+                ['label' => 'OneDrive',   'path' => $home . '\\OneDrive'],
+                ['label' => 'C:\\',       'path' => 'C:\\'],
+                ['label' => 'D:\\',       'path' => 'D:\\'],
+                ['label' => 'E:\\',       'path' => 'E:\\'],
+            ];
+            foreach ($candidates as $c) {
+                if (is_dir($c['path'])) $shortcuts[] = $c;
+            }
+        } else {
+            $home = getenv('HOME') ?: '/home/user';
+            foreach ([
+                ['label' => 'Home',      'path' => $home],
+                ['label' => 'Desktop',   'path' => $home . '/Desktop'],
+                ['label' => 'Documents', 'path' => $home . '/Documents'],
+                ['label' => '/media',    'path' => '/media'],
+                ['label' => '/mnt',      'path' => '/mnt'],
+            ] as $c) {
+                if (is_dir($c['path'])) $shortcuts[] = $c;
+            }
+        }
+        return $shortcuts;
+    }
+
+    private function isHidden(string $name): bool
+    {
+        // Hide dot-folders on all OS, and common Windows system dirs
+        if (str_starts_with($name, '.')) return true;
+        $systemDirs = ['$Recycle.Bin', 'System Volume Information', 'Recovery', 'ProgramData',
+                       'Windows', 'PerfLogs', 'Config.Msi'];
+        return in_array($name, $systemDirs, true);
+    }
 }
