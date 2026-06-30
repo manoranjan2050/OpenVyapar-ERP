@@ -1,1 +1,0 @@
-C:\Users\manor\MyProject\OpenVyapar\ ERP\openvyapar\portable\launcher-rs\target\release\OpenVyapar.exe: C:\Users\manor\MyProject\OpenVyapar\ ERP\openvyapar\portable\launcher-rs\build.rs C:\Users\manor\MyProject\OpenVyapar\ ERP\openvyapar\portable\launcher-rs\src\main.rs
