@@ -64,8 +64,8 @@ class BackupController extends Controller
         // Include a README
         $readme  = "OpenVyapar ERP Backup\n";
         $readme .= "Created: " . now()->toDateTimeString() . "\n";
-        $readme .= "Database: $db\n";
-        $readme .= "To restore: import the .sql file into your MySQL database.\n";
+        $readme .= "Driver: {$connection}\n";
+        $readme .= "To restore: use the Backup & Restore page in OpenVyapar ERP.\n";
         $zip->addFromString('README.txt', $readme);
         $zip->close();
 
